@@ -1,6 +1,7 @@
-const navigationContent = [
-    {
-        href: '#o-nas',
-        label: 'O nas'
-    }
-]
+export const navigationContent = [
+	{ href: "#ksiazki", label: "Książki" },
+	{
+		href: "#o-nas",
+		label: "O nas",
+	},
+];
