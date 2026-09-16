@@ -9,6 +9,39 @@ export default function Navigation() {
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [isNavMobileOpen, setIsNavMobileOpen] = useState(false);
 
+	const changeActiveLink = (index: number) => {
+		document.documentElement.style.setProperty("--index", String(index));
+		setIdx(index);
+	};
+
+	useEffect(() => {
+		const ids = navigationContent.map((link) => link.href.slice(1));
+		const sections = ids
+			.map((id) => document.getElementById(id))
+			.filter((el) => el !== null);
+		let activeSectionIndex = 0;
+		if (sections.length === 0) return;
+
+		const seen = new Set<string>();
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) seen.add(entry.target.id);
+					else seen.delete(entry.target.id);
+				}
+
+				const activeSectionId = ids.find((id) => seen.has(id)) ?? "";
+				activeSectionIndex = ids.indexOf(activeSectionId);
+
+				if (activeSectionIndex === -1) return;
+
+				changeActiveLink(Number(activeSectionIndex));
+			},
+			{ rootMargin: "-200px" },
+		);
+		sections.forEach((section: HTMLElement) => observer.observe(section));
+		return () => observer.disconnect();
+	}, []);
 	useEffect(() => {
 		const onScroll = () =>
 			setIsScrolled(window.scrollY > 100 && window.innerWidth >= 640);
@@ -17,11 +50,6 @@ export default function Navigation() {
 
 		return () => window.removeEventListener("scroll", onScroll);
 	}, []);
-
-	const changeActiveLink = (index: number) => {
-		document.documentElement.style.setProperty("--index", String(index));
-		setIdx(index);
-	};
 
 	const handleMobileNav = () => {
 		setIsNavMobileOpen((p) => !p);
@@ -50,7 +78,6 @@ export default function Navigation() {
 						return (
 							<li className="nav-item relative z-0" key={link.href}>
 								<Link
-									onClick={() => changeActiveLink(i)}
 									className={`${isActive ? "text-white" : "text-accent"} text-sm sm:text-md lg:text-[1.1rem] block w-(--linkWidth) text-center transition-colors duration-800 hover:opacity-90`}
 									href={link.href}>
 									{link.label}

@@ -18,7 +18,7 @@ export default function Books() {
 	};
 
 	return (
-		<section className="p-2 py-10 bg-[#fffdfd] sm:py-15 md:py-20">
+		<section id="ksiazki" className="p-2 py-10 bg-[#fffdfd] sm:py-15 md:py-20">
 			<div className="books-content container mx-auto">
 				<h2 className="text-center text-accent text-[clamp(1rem,calc(1rem+1vw),2rem)] uppercase font-medium">
 					{booksContent.booksTitle}
