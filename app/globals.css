@@ -7,6 +7,10 @@ body {
 :root {
 	--index: 0;
 	--linkWidth: 90px;
+	--accent: #193f64;
+	--main-color: #e8dddd;
+	--panel-color: #fff;
+	--text-color: #193f64;
 
 	scroll-padding-top: 100px;
 }
@@ -14,7 +18,9 @@ body {
 @theme {
 	--font-montserrat: var(--font-montserrat);
 	--font-playfairDisplay: var(--font-playfairDisplay);
-	--color-accent: #193f64;
+	--color-accent: var(--accent);
+	--color-main: var(--main-color);
+	--color-panel: var(--panel-color);
 }
 .nav-item:first-child::before {
 	content: "";
