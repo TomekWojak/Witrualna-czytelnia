@@ -1,5 +1,5 @@
 import { headerContent } from "@/lib/content";
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Header() {
 	return (
@@ -18,9 +18,11 @@ export default function Header() {
 				<p className="description mt-3 mb-6 text-[clamp(1rem,calc(0.6rem+1vw),1.4rem)]">
 					{headerContent.headerDescription}
 				</p>
-				<button className="bg-accent py-3 px-4 rounded-md cursor-pointer hover:bg-[#064c93] transition-colors md:text-xl">
+				<Link
+					href="/dashboard"
+					className="bg-accent py-3 px-4 rounded-md cursor-pointer hover:bg-[#064c93] transition-colors md:text-xl">
 					{headerContent.headerCta}
-				</button>
+				</Link>
 			</div>
 		</header>
 	);

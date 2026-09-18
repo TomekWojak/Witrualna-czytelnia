@@ -8,9 +8,15 @@ body {
 	--index: 0;
 	--linkWidth: 90px;
 	--accent: #193f64;
+	--accent-secondary: #064c93;
 	--main-color: #e8dddd;
-	--panel-color: #fff;
+	--panel-color: #f0eaea;
 	--text-color: #193f64;
+
+	--premium-gold: #fbbf24;
+	--premium-from: #8b5cf6;
+	--premium-via: #ec4899;
+	--premium-to: #f97316;
 
 	scroll-padding-top: 100px;
 }
@@ -19,8 +25,14 @@ body {
 	--font-montserrat: var(--font-montserrat);
 	--font-playfairDisplay: var(--font-playfairDisplay);
 	--color-accent: var(--accent);
+	--color-accentSecondary: var(--accent-secondary);
 	--color-main: var(--main-color);
 	--color-panel: var(--panel-color);
+	--color-mainTxt: var(--text-color);
+	--color-premiumGold: var(--premium-gold);
+	--color-premiumFrom: var(--premium-from);
+	--color-premiumVia: var(--premium-via);
+	--color-premiumTo: var(--premium-to);
 }
 .nav-item:first-child::before {
 	content: "";
@@ -37,6 +49,24 @@ body {
 }
 .container {
 	width: min(100%, 1400px);
+}
+
+.scrollbar-accent {
+	scrollbar-width: thin;
+	scrollbar-color: var(--accent) transparent;
+}
+.scrollbar-accent::-webkit-scrollbar {
+	width: 6px;
+}
+.scrollbar-accent::-webkit-scrollbar-track {
+	background: transparent;
+}
+.scrollbar-accent::-webkit-scrollbar-thumb {
+	background-color: var(--accent);
+	border-radius: 9999px;
+}
+.scrollbar-accent::-webkit-scrollbar-thumb:hover {
+	background-color: var(--accent-secondary);
 }
 
 @media (width >= 568px) {
