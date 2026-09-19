@@ -35,7 +35,21 @@ const readEpub = async (buffer: ArrayBuffer) => {
 	const data = await path.async("text");
 	const opfPath = getOpfPath(data) ?? "";
 
-	return opfPath;
+	const manifestFile = results.file(opfPath);
+
+	if (!manifestFile) {
+		console.log("Plik uszkodzony");
+		return;
+	}
+
+	const manifestData = await manifestFile.async("text");
+
+	const manifestItems = getManifest(manifestData);
+	const spine = getSpine(manifestData);
+
+	const chapterParts = getChapterPaths(spine, manifestItems);
+
+	return chapterParts;
 };
 
 const getOpfPath = (data: string): string | null | undefined => {
@@ -45,4 +59,43 @@ const getOpfPath = (data: string): string | null | undefined => {
 	const fullPath = rootFile?.getAttribute("full-path");
 
 	return fullPath;
+};
+
+const getManifest = (data: string) => {
+	const domParser = new DOMParser().parseFromString(data, "application/xml");
+	const mappedItems = new Map<string, string>();
+
+	const items = Array.from(domParser.querySelectorAll("manifest item"));
+	items?.forEach((item) => {
+		mappedItems.set(
+			item.getAttribute("id") ?? "",
+			item.getAttribute("href") ?? "",
+		);
+	});
+
+	return mappedItems;
+};
+
+const getSpine = (data: string) => {
+	const domParser = new DOMParser().parseFromString(data, "application/xml");
+	const spineItems = Array.from(domParser.querySelectorAll("spine itemref"));
+
+	const mappedSpineItems = spineItems?.map(
+		(spineItem) => spineItem.getAttribute("idref") ?? "",
+	);
+
+	return mappedSpineItems;
+};
+
+const getChapterPaths = (
+	spine: string[],
+	manifestItems: Map<string, string>,
+): string[] => {
+	const finalArr: string[] = [];
+
+	spine.forEach((item) => {
+		const matchingElement = manifestItems.get(item) ?? "";
+		finalArr.push(matchingElement);
+	});
+	return finalArr.filter((el) => el !== "");
 };
