@@ -1,6 +1,6 @@
 "use client";
 import DashboardAside from "@/components/DashboardAside";
-import DashboardHeader from "@/components/DashboardContent";
+import DashboardContent from "@/components/DashboardContent";
 import { useState } from "react";
 
 export default function Home() {
@@ -9,7 +9,7 @@ export default function Home() {
 	return (
 		<div className="dashboard-content flex w-full h-full">
 			<DashboardAside asideOpen={isAsideOpen} />
-			<DashboardHeader
+			<DashboardContent
 				asideOpen={isAsideOpen}
 				onAsideOpenAction={setIsAsideOpen}
 			/>

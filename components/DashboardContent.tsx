@@ -1,19 +1,38 @@
 "use client";
 
 import type { asideProps } from "@/lib/types";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { handleImportedFile } from "@/lib/uploadingFiles";
+import BookView from "./BookView";
 
 export default function DashboardHeader({
 	asideOpen,
 	onAsideOpenAction,
 }: asideProps) {
 	const importInputRef = useRef<HTMLInputElement>(null);
+	const [isDragging, setIsDragging] = useState(false);
+	const [isDropboxOpen, setisDropboxOpen] = useState(false);
 
-	const handleImportedFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const file = e.target.files?.[0];
-		e.target.value = "";
-		if (!file) return;
-		console.log("Zaimportowano plik:", file.name);
+	const dragenter = (e: React.DragEvent) => {
+		e.stopPropagation();
+		e.preventDefault();
+
+		setIsDragging(true);
+	};
+
+	const dragover = (e: React.DragEvent) => {
+		e.stopPropagation();
+		e.preventDefault();
+	};
+	const drop = (e: React.DragEvent) => {
+		e.stopPropagation();
+		e.preventDefault();
+
+		const dt = e.dataTransfer;
+		const files = dt.files;
+
+		console.log(files);
+		setIsDragging(false);
 	};
 
 	return (
@@ -55,7 +74,7 @@ export default function DashboardHeader({
 						<span className="hidden sm:inline">Zdobądź PRO</span>
 					</button>
 					<button
-						onClick={() => importInputRef.current?.click()}
+						onClick={() => setisDropboxOpen((p) => !p)}
 						className="import-btn flex items-center gap-2 px-3 py-2.5 rounded-md bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium shadow-sm cursor-pointer transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -82,8 +101,24 @@ export default function DashboardHeader({
 					/>
 				</div>
 			</header>
-			<main className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-4 pb-20 pt-5 sm:px-7 sm:pt-7">
-				<div className="container mx-auto"></div>
+			<main className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-4 pb-20 pt-5 sm:px-7 sm:pt-7 scrollbar-accent">
+				<div className="relative container mx-auto h-full">
+					<BookView />
+					<div
+						onDragEnter={dragenter}
+						onDragOver={dragover}
+						onDrop={drop}
+						className={`dropbox ${isDropboxOpen ? "block" : "hidden"} w-[min(85%,400px)] p-2 py-12 rounded-lg absolute left-1/2 top-1/2 -translate-1/2 ${isDragging ? "bg-main/80" : "bg-main/40"} text-center border border-dashed ${isDragging ? "border-accent/70" : "border-accent/40"} text-panel transition-colors`}>
+						<button
+							onClick={() => importInputRef.current?.click()}
+							className="px-3 py-2 bg-accent/95 rounded-md cursor-pointer text-sm">
+							Wybierz plik
+						</button>
+						<p className="text-mainTxt/70 mt-4 text-sm">
+							Wybierz lub przeciągnij plik
+						</p>
+					</div>
+				</div>
 			</main>
 			<div
 				onClick={() => onAsideOpenAction((p) => !p)}

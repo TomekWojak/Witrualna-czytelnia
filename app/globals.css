@@ -12,6 +12,7 @@ body {
 	--main-color: #e8dddd;
 	--panel-color: #f0eaea;
 	--text-color: #193f64;
+	--paper-color: #fdfcfb;
 
 	--premium-gold: #fbbf24;
 	--premium-from: #8b5cf6;
@@ -29,6 +30,7 @@ body {
 	--color-main: var(--main-color);
 	--color-panel: var(--panel-color);
 	--color-mainTxt: var(--text-color);
+	--color-paper: var(--paper-color);
 	--color-premiumGold: var(--premium-gold);
 	--color-premiumFrom: var(--premium-from);
 	--color-premiumVia: var(--premium-via);
