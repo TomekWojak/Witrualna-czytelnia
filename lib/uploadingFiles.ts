@@ -49,7 +49,13 @@ const readEpub = async (buffer: ArrayBuffer) => {
 
 	const chapterParts = getChapterPaths(spine, manifestItems);
 
-	return chapterParts;
+	const chaptersContent = await getChapterContent(
+		results,
+		opfPath,
+		chapterParts,
+	);
+
+	return chaptersContent;
 };
 
 const getOpfPath = (data: string): string | null | undefined => {
@@ -98,4 +104,30 @@ const getChapterPaths = (
 		finalArr.push(matchingElement);
 	});
 	return finalArr.filter((el) => el !== "");
+};
+
+const getChapterContent = async (
+	results: JSZip,
+	base: string,
+	chapterParts: string[],
+) => {
+	const promises: Promise<string>[] = [];
+	const arr: string[] = base.split("/");
+	const prefix: string = arr[0];
+
+	for (const chapter of chapterParts) {
+		const path: string = `${prefix}/${chapter}`;
+		const chapterData = results.file(path);
+
+		if (!chapterData) {
+			console.log("Nieprawidłowa ścieżka pliku lub plik uszkodzony");
+			return;
+		}
+
+		const rawChapterData = chapterData.async("text");
+		promises.push(rawChapterData);
+	}
+	const data = await Promise.all(promises);
+
+	return data;
 };

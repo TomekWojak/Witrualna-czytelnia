@@ -1,12 +1,15 @@
 import { asideLinksMain, asideLinks } from "@/lib/content";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { changeTheme, themes, getThemeIndex } from "@/lib/themes";
+import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
 
 export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
-	const [index, setIndex] = useState(0);
 	const [activeThemeIndex, setActiveThemeIndex] = useState(0);
 	const [isThemePanelOpen, setIsThemePanelOpen] = useState(false);
+
+	const pathname = usePathname();
 
 	useEffect(() => {
 		const savedThemeIndex = getThemeIndex();
@@ -36,12 +39,11 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 						Główne
 					</span>
 					<ul className="p-2">
-						{asideLinksMain.map((link, i) => {
-							const isActive = index === i;
+						{asideLinksMain.map((link) => {
+							const isActive = getActiveLink(pathname)?.href === link.href;
 							return (
 								<li key={link.href}>
 									<Link
-										onClick={() => setIndex(i)}
 										className={`relative flex items-center gap-2 p-2.5 pl-4 text-mainTxt transition-colors hover:bg-accent/5 ${isActive ? "bg-accent/5" : "bg-none"} rounded-lg`}
 										href={link.href}>
 										<svg
@@ -69,13 +71,11 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 						Panel
 					</span>
 					<ul className="p-2">
-						{asideLinks.map((link, i) => {
-							const idx = i + asideLinksMain.length;
-							const isActive = index === idx;
+						{asideLinks.map((link) => {
+							const isActive = pathname === link.href;
 							return (
 								<li key={link.href}>
 									<Link
-										onClick={() => setIndex(idx)}
 										className={`relative flex items-center gap-2 p-2.5 pl-4 text-mainTxt transition-colors hover:bg-accent/5 ${isActive ? "bg-accent/5" : "bg-none"} rounded-lg`}
 										href={link.href}>
 										<svg

@@ -1,45 +1,23 @@
-"use client";
-
-import type { asideProps } from "@/lib/types";
-import { useRef, useState } from "react";
+import type { frameProps } from "@/lib/types";
 import { handleImportedFile } from "@/lib/uploadingFiles";
-import BookView from "./BookView";
+import { usePathname } from "next/navigation";
+import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
+import { useContext } from "react";
+import { HeaderTitleContext } from "@/lib/headerTitleContext";
 
-export default function DashboardHeader({
+export default function DashboardContent({
 	asideOpen,
 	onAsideOpenAction,
-}: asideProps) {
-	const importInputRef = useRef<HTMLInputElement>(null);
-	const [isDragging, setIsDragging] = useState(false);
-	const [isDropboxOpen, setisDropboxOpen] = useState(false);
-
-	const dragenter = (e: React.DragEvent) => {
-		e.stopPropagation();
-		e.preventDefault();
-
-		setIsDragging(true);
-	};
-
-	const dragover = (e: React.DragEvent) => {
-		e.stopPropagation();
-		e.preventDefault();
-	};
-	const drop = (e: React.DragEvent) => {
-		e.stopPropagation();
-		e.preventDefault();
-
-		const dt = e.dataTransfer;
-		const files = dt.files;
-
-		console.log(files);
-		setIsDragging(false);
-	};
-
+	inputRefs,
+	onDropboxOpen,
+}: frameProps) {
+	const pathname = usePathname();
+	const titleContext = useContext(HeaderTitleContext);
 	return (
-		<div className="relative dashboard-main w-full h-full flex flex-col">
+		<div className="relative dashboard-main w-full flex flex-col">
 			<header
 				className={`flex px-6 items-center justify-between sticky top-0 bg-linear-to-r from-panel to-main h-17 border-b border-accent/20 transition-[grid-column] duration-500 z-30`}>
-				<div className="header-left">
+				<div className="header-left flex items-center gap-2">
 					<button
 						onClick={() => onAsideOpenAction((p) => !p)}
 						className={`md:hidden manage-sidebar-btn p-1 cursor-pointer transition-colors duration-300 hover:bg-accent/15 rounded-md`}>
@@ -59,6 +37,9 @@ export default function DashboardHeader({
 							<line x1="3" y1="18" x2="21" y2="18"></line>
 						</svg>
 					</button>
+					<span className="text-mainTxt">
+						{titleContext.title ?? getActiveLink(pathname)?.label}
+					</span>
 				</div>
 				<div className="header-right flex items-center gap-6">
 					<button className="relative pro-btn flex items-center gap-2 px-4 py-2.5 rounded-full bg-linear-to-r from-premiumFrom via-premiumVia to-premiumTo text-white text-sm font-semibold cursor-pointer before:content-[''] before:absolute before:bg-linear-to-r before:from-premiumFrom before:via-premiumVia before:to-premiumTo before:-inset-px before:rounded-full before:-z-1 before:blur-[10px] before:opacity-25 before:transition-opacity before:duration-300 hover:before:opacity-50">
@@ -74,7 +55,7 @@ export default function DashboardHeader({
 						<span className="hidden sm:inline">Zdobądź PRO</span>
 					</button>
 					<button
-						onClick={() => setisDropboxOpen((p) => !p)}
+						onClick={() => onDropboxOpen((p) => !p)}
 						className="import-btn flex items-center gap-2 px-3 py-2.5 rounded-md bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium shadow-sm cursor-pointer transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +74,7 @@ export default function DashboardHeader({
 						<span className="hidden sm:inline">Importuj</span>
 					</button>
 					<input
-						ref={importInputRef}
+						ref={inputRefs}
 						onChange={handleImportedFile}
 						type="file"
 						accept=".epub,.pdf,.mobi"
@@ -101,25 +82,7 @@ export default function DashboardHeader({
 					/>
 				</div>
 			</header>
-			<main className="relative flex-1 min-h-0 overflow-x-hidden overflow-y-auto px-4 pb-20 pt-5 sm:px-7 sm:pt-7 scrollbar-accent">
-				<div className="relative container mx-auto h-full">
-					<BookView />
-					<div
-						onDragEnter={dragenter}
-						onDragOver={dragover}
-						onDrop={drop}
-						className={`dropbox ${isDropboxOpen ? "block" : "hidden"} w-[min(85%,400px)] p-2 py-12 rounded-lg absolute left-1/2 top-1/2 -translate-1/2 ${isDragging ? "bg-main/80" : "bg-main/40"} text-center border border-dashed ${isDragging ? "border-accent/70" : "border-accent/40"} text-panel transition-colors`}>
-						<button
-							onClick={() => importInputRef.current?.click()}
-							className="px-3 py-2 bg-accent/95 rounded-md cursor-pointer text-sm">
-							Wybierz plik
-						</button>
-						<p className="text-mainTxt/70 mt-4 text-sm">
-							Wybierz lub przeciągnij plik
-						</p>
-					</div>
-				</div>
-			</main>
+
 			<div
 				onClick={() => onAsideOpenAction((p) => !p)}
 				className={`overlay ${asideOpen ? "block" : "hidden"} fixed inset-0 bg-black/30 z-20 md:hidden`}></div>
