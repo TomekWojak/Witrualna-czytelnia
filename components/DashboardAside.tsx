@@ -93,11 +93,11 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 						Archetyp
 					</span>
 				</div>
-				<nav>
+				<nav aria-label="Nawigacja główna">
 					<span className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent">
 						Główne
 					</span>
-					<ul className="p-2">
+					<ul className="p-2 flex flex-col gap-1">
 						{asideLinksMain.map((link) => {
 							const isActive = getActiveLink(pathname)?.href === link.href;
 							return (
@@ -129,9 +129,9 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 					<span className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent">
 						Panel
 					</span>
-					<ul className="p-2">
+					<ul className="p-2 flex flex-col gap-1">
 						{asideLinks.map((link) => {
-							const isActive = pathname === link.href;
+							const isActive = getActiveLink(pathname)?.href === link.href;
 							return (
 								<li key={link.href}>
 									<Link

@@ -54,6 +54,18 @@ export const loginBtns = [
 	{ href: "/logowanie", label: "Zaloguj się" },
 	{ href: "/rejestracja", label: "Zarejestruj się" },
 ];
+export const settingsLinks = [
+	{
+		href: "/dashboard/ustawienia/profil",
+		label: "Profil",
+		icon: `<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>`,
+	},
+	{
+		href: "/dashboard/ustawienia/konto",
+		label: "Konto",
+		icon: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>`,
+	},
+];
 
 export const asideLinks = [
 	{
