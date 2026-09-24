@@ -1,6 +1,7 @@
 export type frameProps = {
 	asideOpen: boolean;
 	onAsideOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
+	onDesktopAsideOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	inputRefs: React.RefObject<HTMLInputElement | null>;
 	onDropboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };

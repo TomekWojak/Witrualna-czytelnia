@@ -70,7 +70,7 @@ export default function Profile() {
 				<div className="group input-box relative">
 					<input
 						onChange={(e) => {
-							const reachedMax = validateField(e, MAX_USERNAME_SETTINGS_LENGTH);
+							const reachedMax = validateField(e, 20);
 
 							if (reachedMax) return;
 							setUsernameValue(e.target.value);
@@ -81,7 +81,7 @@ export default function Profile() {
 						className=" w-full p-2 border border-accent/20 rounded-md outline-0 focus:border-accent/70 transition-colors duration-300"
 					/>
 					<span className="absolute flex items-center justify-center right-0 inset-y-0 w-15 bg-panel border border-accent/20 rounded-md border-l-0 rounded-tl-none rounded-bl-none group-focus-within:border-accent/70 transition-colors duration-300 text-accent/70">
-						{usernameValue.length}/{MAX_USERNAME_SETTINGS_LENGTH}
+						{usernameValue.length}/{20}
 					</span>
 				</div>
 				<hr className="border-accent/20 my-10" />
@@ -93,16 +93,17 @@ export default function Profile() {
 						placeholder="Kilka słow o tobie..."
 						value={textareaValue}
 						onChange={(e) => {
-							const reachedMax = validateField(e, MAX_BIO_SETTINGS_LENGTH);
+							const reachedMax = validateField(e, 400);
 							if (reachedMax) return;
 							setTextareaValue(e.target.value);
 						}}
-						maxLength={MAX_BIO_SETTINGS_LENGTH}
+						maxLength={400}
 						id="bio"
 						className=" w-full p-2 border border-accent/20 rounded-md outline-0 focus:border-accent/70 transition-colors duration-300 min-h-30 max-h-35"
 					/>
 					<span className="block ml-auto mt-2 text-accent/70">
-						{textareaValue.length}/{MAX_BIO_SETTINGS_LENGTH}
+						{textareaValue.length}/{400}
+						{/* zmienić na MAX_BIO... */}
 					</span>
 				</div>
 			</div>

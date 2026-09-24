@@ -1,16 +1,16 @@
 "use client";
 import DashboardAside from "@/components/DashboardAside";
 import DashboardContent from "@/components/DashboardContent";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
 
 export default function Layout({ children }: LayoutProps<"/">) {
 	const [isAsideOpen, setIsAsideOpen] = useState(false);
+	const [isDesktopAsideOpen, setIsDesktopAsideOpen] = useState(true);
 	const [isDragging, setIsDragging] = useState(false);
 	const importInputRef = useRef<HTMLInputElement>(null);
 	const [isDropboxOpen, setisDropboxOpen] = useState(false);
 	const [title, setTitle] = useState<string | undefined>(undefined);
-
 
 	const dragenter = (e: React.DragEvent) => {
 		e.stopPropagation();
@@ -32,13 +32,22 @@ export default function Layout({ children }: LayoutProps<"/">) {
 
 		setIsDragging(false);
 	};
+	useEffect(() => {
+		const saved = localStorage.getItem("isDesktopAsideOpen");
+		if (saved === null) return;
+		setIsDesktopAsideOpen(saved === "true");
+	}, []);
 
 	return (
 		<HeaderTitleContext value={{ title, setTitle }}>
 			<div className="dashboard-content flex w-full h-full">
-				<DashboardAside asideOpen={isAsideOpen} />
+				<DashboardAside
+					isDesktopAsideOpen={isDesktopAsideOpen}
+					asideOpen={isAsideOpen}
+				/>
 				<div className="flex flex-col w-full h-full">
 					<DashboardContent
+						onDesktopAsideOpen={setIsDesktopAsideOpen}
 						asideOpen={isAsideOpen}
 						onAsideOpenAction={setIsAsideOpen}
 						inputRefs={importInputRef}

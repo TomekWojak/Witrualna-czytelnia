@@ -15,7 +15,13 @@ type UserData = {
 	plan: string;
 };
 
-export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
+export default function DashboardAside({
+	asideOpen,
+	isDesktopAsideOpen,
+}: {
+	asideOpen: boolean;
+	isDesktopAsideOpen: boolean;
+}) {
 	const [activeThemeIndex, setActiveThemeIndex] = useState(0);
 	const [isThemePanelOpen, setIsThemePanelOpen] = useState(false);
 	const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
@@ -80,7 +86,7 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 	return (
 		<>
 			<aside
-				className={`flex flex-col overscroll-contain col-start-1 col-end-2 w-70 h-dvh ${asideOpen ? "translate-x-0" : "-translate-x-full"} bg-linear-to-b from-panel to-main fixed inset-y-0 md:static md:translate-x-0 left-0 border-r border-accent/20 transition-transform duration-200 md:transition-none z-50 shrink-0`}>
+				className={`flex flex-col overscroll-contain col-start-1 col-end-2 ${isDesktopAsideOpen ? "md:w-70 overflow-visible" : "md:w-0 overflow-hidden"} h-dvh ${asideOpen ? "translate-x-0" : "-translate-x-full"} bg-linear-to-b from-panel to-main fixed inset-y-0 md:static md:translate-x-0 left-0 border-r border-accent/20 transition-transform duration-200 md:transition-none z-50 shrink-0`}>
 				<div className="aside-header overflow-hidden p-4 flex items-center h-17 border-b border-accent/20">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
