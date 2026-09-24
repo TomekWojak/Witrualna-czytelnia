@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { navigationContent } from "@/lib/content";
+import { navigationContent, loginBtns } from "@/lib/content";
 import { useEffect, useState } from "react";
 
 export default function Navigation() {
 	const [idx, setIdx] = useState(0);
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [isNavMobileOpen, setIsNavMobileOpen] = useState(false);
+	const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
 
 	const changeActiveLink = (index: number) => {
 		document.documentElement.style.setProperty("--index", String(index));
@@ -58,7 +59,7 @@ export default function Navigation() {
 	return (
 		<div
 			className={`fixed left-1/2 -translate-x-1/2 bg-white ${isScrolled ? "w-[min(100%,1000px)]" : "w-full"} ${isScrolled ? "rounded-[30px]" : "rounded-none"} ${isScrolled ? "top-8" : "top-0"} flex justify-center transition-[top,width,border-radius] duration-600 z-1000 shadow-sm border border-accent/30`}>
-			<nav className="max-w-400 w-full p-2 px-4 md:p-4 md:px-10 flex items-center justify-between sm:justify-normal">
+			<nav className="max-w-400 relative w-full p-2 px-4 md:p-4 md:px-10 flex items-center justify-between sm:justify-normal">
 				<Link
 					href="/"
 					aria-label="Logo strony Archetyp"
@@ -86,7 +87,9 @@ export default function Navigation() {
 						);
 					})}
 				</ul>
-				<button className="hidden sm:block cursor-pointer p-2 rounded-full hover:bg-[#f1f1f1] transition-colors duration-300">
+				<button
+					onClick={() => setIsLoginPanelOpen((p) => !p)}
+					className="hidden sm:block cursor-pointer p-2 rounded-full hover:bg-[#f1f1f1] transition-colors duration-300">
 					<Image
 						className="w-6"
 						src="/homePageAssets/user-regular-full.svg"
@@ -105,16 +108,15 @@ export default function Navigation() {
 								</a>
 							</li>
 						))}
-						<li>
-							<button className="cursor-pointer p-2 rounded-full">
-								<Image
-									className="w-6"
-									src="/homePageAssets/user-regular-full.svg"
-									width={150}
-									height={150}
-									alt=""
-								/>
-							</button>
+						<li className="flex flex-col gap-2 w-1/2">
+							{loginBtns.map((btn) => (
+								<Link
+									key={btn.href}
+									href={btn.href}
+									className="px-3 w-full text-center py-2 bg-accent text-white rounded-lg border border-transparent hover:text-accent hover:bg-transparent hover:border-accent transition-colors duration-300">
+									{btn.label}
+								</Link>
+							))}
 						</li>
 					</ul>
 					<button
@@ -128,6 +130,17 @@ export default function Navigation() {
 							alt=""
 						/>
 					</button>
+				</div>
+				<div
+					className={`${isLoginPanelOpen ? "flex" : "hidden"} min-w-60 flex-col items-center gap-3 login-panel p-3 absolute right-0 -bottom-1 translate-y-full bg-white rounded-lg shadow-sm border border-accent/30`}>
+					{loginBtns.map((btn) => (
+						<Link
+							key={btn.href}
+							href={btn.href}
+							className="px-3 w-full text-center py-2 bg-accent text-white rounded-lg border border-transparent hover:text-accent hover:bg-transparent hover:border-accent transition-colors duration-300">
+							{btn.label}
+						</Link>
+					))}
 				</div>
 				<button
 					onClick={handleMobileNav}

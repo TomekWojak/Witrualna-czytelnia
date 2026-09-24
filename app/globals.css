@@ -71,6 +71,12 @@ body {
 	background-color: var(--accent-secondary);
 }
 
+@keyframes shimmer {
+	100% {
+		transform: translateX(100%);
+	}
+}
+
 @media (width >= 568px) {
 	:root {
 		--linkWidth: 100px;

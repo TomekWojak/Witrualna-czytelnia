@@ -4,13 +4,72 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { changeTheme, themes, getThemeIndex } from "@/lib/themes";
 import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
+import { supabaseClient } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { AsidePanelUserDataSkeleton } from "./Skeleton";
+import Image from "next/image";
+
+type UserData = {
+	name: string;
+	avatar_url: string;
+	plan: string;
+};
 
 export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 	const [activeThemeIndex, setActiveThemeIndex] = useState(0);
 	const [isThemePanelOpen, setIsThemePanelOpen] = useState(false);
+	const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [userData, setUserData] = useState<UserData | null>(null);
+
+	const router = useRouter();
+
+	async function logOutUser() {
+		try {
+			setIsLoading(true);
+			await supabaseClient.auth.signOut();
+
+			router.push("/logowanie");
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setIsLoading(false);
+		}
+	}
+
+	useEffect(() => {
+		const getData = async () => {
+			const {
+				data: { user },
+			} = await supabaseClient.auth.getUser();
+
+			if (!user) {
+				throw new Error("Wystąpił problem z identyfikacją użytkownika");
+			}
+
+			const { data, error } = await supabaseClient
+				.from("profiles")
+				.select("name, avatar_url, plan")
+				.eq("id", user.id)
+				.single();
+
+			if (!data) {
+				console.error(error);
+				return;
+			}
+
+			setUserData((prev) => ({
+				...prev,
+				name: data?.name,
+				avatar_url: data?.avatar_url,
+				plan: data?.plan[0].toUpperCase() + data?.plan.slice(1),
+			}));
+		};
+
+		getData();
+	}, []);
 
 	const pathname = usePathname();
-
 	useEffect(() => {
 		const savedThemeIndex = getThemeIndex();
 		if (savedThemeIndex === undefined || savedThemeIndex === -1) return;
@@ -186,12 +245,72 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 						</li>
 					</ul>
 				</nav>
-				<div className="aside-acount-details flex items-center p-4 border-t border-accent/10 mt-auto">
-					<span className="block w-7 h-7 rounded-full bg-linear-to-br from-accent to-accentSecondary"></span>
-					<span className="text-mainTxt ml-2">Username</span>
-					<span className="px-2 py-1 ml-auto border border-accent/40 text-xs font-medium bg-linear-to-r from-accent/15 to-accentSecondary/20 text-accent rounded-full">
-						Free
-					</span>
+				<div className="relative aside-acount-details flex items-center p-4 border-t border-accent/10 mt-auto">
+					{userData ? (
+						<>
+							<button
+								onClick={() => setIsUserPanelOpen((p) => !p)}
+								className="flex items-center justify-center w-7 h-7 rounded-full bg-linear-to-br from-accent to-accentSecondary text-xs cursor-pointer text-panel">
+								{userData.avatar_url ? (
+									<Image
+										src={userData.avatar_url}
+										width={28}
+										height={28}
+										alt="Avatar użytkownika"
+									/>
+								) : (
+									userData.name && userData.name[0]
+								)}
+							</button>
+							<span className="text-mainTxt ml-2">
+								{userData.name || "Username"}
+							</span>
+							<span className="px-2 py-1 ml-auto border border-accent/40 text-xs font-medium bg-linear-to-r from-accent/15 to-accentSecondary/20 text-accent rounded-full">
+								{userData.plan}
+							</span>
+							<ul
+								className={`${isUserPanelOpen ? "flex" : "hidden"} absolute bg-panel p-2 rounded-md left-4 top-2 -translate-y-full min-w-60 flex-col text-xs text-mainTxt gap-2`}>
+								<li className="w-full">
+									<button
+										onClick={logOutUser}
+										className="p-2 flex items-center justify-between hover:bg-accent/5 w-full text-left rounded-md">
+										Wyloguj się
+										{isLoading && (
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="16"
+												height="16"
+												fill="none"
+												className="w-3 animate-spin stroke-accent"
+												viewBox="0 0 16 16">
+												<path
+													fill="#fff"
+													d="M9.25 1.5c0 .719-.563 1.25-1.25 1.25-.719 0-1.25-.531-1.25-1.25C6.75.812 7.281.25 8 .25c.688 0 1.25.563 1.25 1.25ZM8 13.25c.688 0 1.25.563 1.25 1.25 0 .719-.563 1.25-1.25 1.25-.719 0-1.25-.531-1.25-1.25 0-.688.531-1.25 1.25-1.25ZM15.75 8c0 .719-.563 1.25-1.25 1.25-.719 0-1.25-.531-1.25-1.25 0-.688.531-1.25 1.25-1.25.688 0 1.25.563 1.25 1.25Zm-13 0c0 .719-.563 1.25-1.25 1.25C.781 9.25.25 8.719.25 8c0-.688.531-1.25 1.25-1.25.688 0 1.25.563 1.25 1.25Zm.625-5.844c.719 0 1.25.563 1.25 1.25 0 .719-.531 1.25-1.25 1.25-.688 0-1.25-.531-1.25-1.25 0-.687.563-1.25 1.25-1.25Zm9.219 9.219c.687 0 1.25.531 1.25 1.25 0 .688-.563 1.25-1.25 1.25-.719 0-1.25-.563-1.25-1.25 0-.719.531-1.25 1.25-1.25Zm-9.219 0c.719 0 1.25.531 1.25 1.25 0 .688-.531 1.25-1.25 1.25-.688 0-1.25-.563-1.25-1.25 0-.719.563-1.25 1.25-1.25Z"
+												/>
+											</svg>
+										)}
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="24"
+											height="24"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className={`${isLoading ? "hidden" : "block"} feather stroke-accent feather-log-out w-3`}>
+											<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+											<polyline points="16 17 21 12 16 7"></polyline>
+											<line x1="21" y1="12" x2="9" y2="12"></line>
+										</svg>
+									</button>
+								</li>
+							</ul>
+						</>
+					) : (
+						<AsidePanelUserDataSkeleton />
+					)}
 				</div>
 			</aside>
 		</>
