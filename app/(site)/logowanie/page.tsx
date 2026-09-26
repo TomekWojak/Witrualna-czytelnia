@@ -33,9 +33,11 @@ export default function LoginPage() {
 				setError("Błędne dane logowania");
 				return;
 			}
-
+			console.log("tedt przed router.push");
 			router.push("/dashboard");
 			router.refresh();
+			console.log("tedt po router.push");
+
 			setError("");
 		} catch (err) {
 			console.log(err);
