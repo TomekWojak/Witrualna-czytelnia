@@ -12,7 +12,7 @@ export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
-	const handleForm = async (e: React.SubmitEvent<HTMLFormElement>) => {
+	const handleForm = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const email = emailValue.trim();
@@ -22,27 +22,27 @@ export default function LoginPage() {
 			setError("Uzupełnij wymagane pola!");
 			return;
 		}
+
 		try {
 			setIsLoading(true);
-			const client = await supabaseClient.auth.signInWithPassword({
-				email,
-				password,
-			});
+			setError("");
 
-			if (client.error || client.data.user === null) {
+			const { data, error: signInError } =
+				await supabaseClient.auth.signInWithPassword({
+					email,
+					password,
+				});
+
+			if (signInError || !data.user) {
 				setError("Błędne dane logowania");
+				setIsLoading(false);
 				return;
 			}
-			console.log("tedt przed router.push");
 			router.push("/dashboard");
-			router.refresh();
-			console.log("tedt po router.push");
 
-			setError("");
 		} catch (err) {
-			console.log(err);
-			return;
-		} finally {
+			console.error(err);
+			setError("Wystąpił nieoczekiwany błąd.");
 			setIsLoading(false);
 		}
 	};
