@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
-import {
-	MAX_USERNAME_SETTINGS_LENGTH,
-	MAX_BIO_SETTINGS_LENGTH,
-} from "@/lib/formsConditions";
+// import {
+// 	MAX_USERNAME_SETTINGS_LENGTH,
+// 	MAX_BIO_SETTINGS_LENGTH,
+// } from "@/lib/formsConditions";
 import { supabaseClient } from "@/lib/supabase";
 import { UserProfileContext } from "@/lib/UserProfileContext";
 import { useContext, useEffect, useRef, useState } from "react";
