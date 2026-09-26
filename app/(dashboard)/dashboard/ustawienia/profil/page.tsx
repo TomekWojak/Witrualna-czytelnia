@@ -8,11 +8,15 @@ import { supabaseClient } from "@/lib/supabase";
 import { UserProfileContext } from "@/lib/UserProfileContext";
 import { useContext, useEffect, useRef, useState } from "react";
 export default function Profile() {
-	const { setUserData } = useContext(UserProfileContext);
+	const { setUserData, userData } = useContext(UserProfileContext);
 	const avatarInputRefs = useRef<HTMLInputElement>(null);
 	const [usernameValue, setUsernameValue] = useState("");
 	const [textareaValue, setTextareaValue] = useState("");
-	const [initialData, setInitalData] = useState({ name: "", bio: "" });
+	const [initialData, setInitalData] = useState({
+		name: "",
+		bio: "",
+		// avatar_url: "",
+	});
 	const [userId, setUserId] = useState<string>("");
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +37,11 @@ export default function Profile() {
 		return false;
 	};
 
+	const handleUserImage = (
+		e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
+	) => {
+		console.log(e.target.files?.[0]);
+	};
 	const handleSave = async () => {
 		try {
 			setIsLoading(true);
@@ -46,7 +55,12 @@ export default function Profile() {
 			setUserData((prev) =>
 				prev
 					? { ...prev, name: usernameValue, bio: textareaValue }
-					: { name: usernameValue, bio: textareaValue, avatar_url: null, plan: "" },
+					: {
+							name: usernameValue,
+							bio: textareaValue,
+							avatar_url: null,
+							plan: "",
+						},
 			);
 		} catch (err) {
 			console.error(err);
@@ -96,13 +110,21 @@ export default function Profile() {
 				Zarządzaj swoimi danymi i ustawieniami konta
 			</p>
 			<div className="avatar-box mt-5 flex items-center gap-10">
-				<Image
-					src="/homePageAssets/church-7390546_1280.jpg"
-					width={50}
-					height={50}
-					className="w-25 aspect-square rounded-full object-cover object-center"
-					alt="Avatar użytkownika"
-				/>
+				{userData &&
+					(userData.avatar_url ? (
+						<Image
+							src={userData.avatar_url}
+							width={28}
+							height={28}
+							alt="Avatar użytkownika"
+						/>
+					) : (
+						<div className="w-20 flex items-center justify-center text-panel aspect-square rounded-full bg-accent">
+							<span className="text-xl">
+								{userData.name && userData.name[0]}
+							</span>
+						</div>
+					))}
 				<button
 					onClick={() => avatarInputRefs.current?.click()}
 					className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent/10 text-accent text-sm font-medium cursor-pointer transition-colors hover:bg-accent/15 duration-300">
@@ -123,9 +145,10 @@ export default function Profile() {
 					<span>Zmień avatar</span>
 				</button>
 				<input
+					onChange={handleUserImage}
 					ref={avatarInputRefs}
 					type="file"
-					accept=".epub,.pdf,.mobi"
+					accept=".png,.jpg,.webp"
 					className="hidden"
 				/>
 			</div>
