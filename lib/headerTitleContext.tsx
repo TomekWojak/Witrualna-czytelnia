@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import type { ContextProps } from "./types";
-export const HeaderTitleContext = createContext<ContextProps>({
+import type { HeaderContextProps } from "./types";
+export const HeaderTitleContext = createContext<HeaderContextProps>({
 	title: undefined,
 	setTitle: () => {},
 });

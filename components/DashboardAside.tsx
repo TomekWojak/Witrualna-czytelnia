@@ -1,19 +1,14 @@
 import { asideLinksMain, asideLinks } from "@/lib/content";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { changeTheme, themes, getThemeIndex } from "@/lib/themes";
 import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
 import { supabaseClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { UserProfileContext } from "@/lib/UserProfileContext";
 import { AsidePanelUserDataSkeleton } from "./Skeleton";
 import Image from "next/image";
-
-type UserData = {
-	name: string;
-	avatar_url: string;
-	plan: string;
-};
 
 export default function DashboardAside({
 	asideOpen,
@@ -26,7 +21,8 @@ export default function DashboardAside({
 	const [isThemePanelOpen, setIsThemePanelOpen] = useState(false);
 	const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
-	const [userData, setUserData] = useState<UserData | null>(null);
+
+	const { userData, setUserData } = useContext(UserProfileContext);
 
 	const router = useRouter();
 
@@ -55,7 +51,7 @@ export default function DashboardAside({
 
 			const { data, error } = await supabaseClient
 				.from("profiles")
-				.select("name, avatar_url, plan")
+				.select("name, avatar_url, plan, bio")
 				.eq("id", user.id)
 				.single();
 
@@ -64,16 +60,16 @@ export default function DashboardAside({
 				return;
 			}
 
-			setUserData((prev) => ({
-				...prev,
-				name: data?.name,
-				avatar_url: data?.avatar_url,
-				plan: data?.plan[0].toUpperCase() + data?.plan.slice(1),
-			}));
+			setUserData({
+				name: data.name,
+				avatar_url: data.avatar_url,
+				plan: data.plan[0].toUpperCase() + data.plan.slice(1),
+				bio: data.bio,
+			});
 		};
 
 		getData();
-	}, []);
+	}, [setUserData]);
 
 	const pathname = usePathname();
 	useEffect(() => {

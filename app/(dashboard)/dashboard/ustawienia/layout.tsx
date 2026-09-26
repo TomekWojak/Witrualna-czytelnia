@@ -16,7 +16,7 @@ export default function SettingsLayout({ children }: LayoutProps<"/">) {
 							<li key={link.href}>
 								<Link
 									href={link.href}
-									className={`relative flex items-center gap-2 p-4 text-mainTxt transition-colors hover:bg-accent/5 rounded-lg ${isActive ? "bg-accent/10" : "bg-none"}`}>
+									className={`relative flex items-center gap-2 p-3 text-mainTxt transition-colors hover:bg-accent/5 rounded-lg ${isActive ? "bg-accent/10" : "bg-none"}`}>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										width="20"
