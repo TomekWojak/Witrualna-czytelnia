@@ -39,7 +39,11 @@ export const handleImportedFile = async (
 
 		setChaptersToDatabase(results.chaptersContent, results.id);
 
-		return { success: true, message: "Pomyślnie załadowano ebooka!" };
+		return {
+			success: true,
+			message: "Pomyślnie załadowano ebooka!",
+			id: results.id,
+		};
 	}
 	return { success: false, message: "Wystąpił nieoczekiwany problem" };
 };

@@ -24,6 +24,7 @@ body {
 
 @theme {
 	--font-montserrat: var(--font-montserrat);
+	--font-lora: var(--font-lora);
 	--font-playfairDisplay: var(--font-playfairDisplay);
 	--color-accent: var(--accent);
 	--color-accentSecondary: var(--accent-secondary);

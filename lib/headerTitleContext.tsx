@@ -3,4 +3,6 @@ import type { HeaderContextProps } from "./types";
 export const HeaderTitleContext = createContext<HeaderContextProps>({
 	title: undefined,
 	setTitle: () => {},
+	author: undefined,
+	setAuthor: () => {},
 });

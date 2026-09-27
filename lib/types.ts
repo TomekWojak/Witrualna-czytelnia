@@ -12,6 +12,8 @@ export type frameProps = {
 export type HeaderContextProps = {
 	title: string | undefined;
 	setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
+	author: string | undefined;
+	setAuthor: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 export type UserData = {
 	name: string | null;
@@ -20,9 +22,32 @@ export type UserData = {
 	bio: string | null;
 };
 
-export type ImportResult = { success: boolean; message: string };
+export type ImportResult =
+	| { success: true; message: string; id: string }
+	| { success: false; message: string };
 
 export type UserContextProps = {
 	userData: UserData | null;
 	setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
 };
+export type UploadInfoContextProps = {
+	setUploadingFileInfo: React.Dispatch<
+		React.SetStateAction<ImportResult | null>
+	>;
+};
+export type BookInfo =
+	| {
+			success: true;
+			title: string;
+			author: string;
+			chapters: {
+				content: string;
+			}[];
+	  }
+	| { success: false; message: string };
+
+// export type BookStructure = {
+// 	title: string;
+// 	author: string;
+// 	chapters: { content: string }[];
+// };

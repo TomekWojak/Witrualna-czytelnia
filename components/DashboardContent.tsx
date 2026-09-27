@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
 import { useContext } from "react";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
+import { useRouter } from "next/navigation";
 
 export default function DashboardContent({
 	asideOpen,
@@ -16,17 +17,20 @@ export default function DashboardContent({
 }: frameProps) {
 	const pathname = usePathname();
 	const titleContext = useContext(HeaderTitleContext);
+	const router = useRouter();
 
 	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		setIsFileLoading(true);
-		const { success, message } = await handleImportedFile(e);
+		const fileData = await handleImportedFile(e);
 
-		setUploadingFileInfo({ success, message });
+		if (fileData.success && fileData.id) {
+			router.push(`/dashboard/czytam/${fileData.id}`);
+		}
+
+		setUploadingFileInfo(fileData);
+
 		setIsFileLoading(false);
-
-		setTimeout(() => {
-			setUploadingFileInfo(null);
-		}, 5000);
+		onDropboxOpen((p) => !p);
 	};
 
 	const handleDesktopNav = () => {
@@ -79,8 +83,19 @@ export default function DashboardContent({
 							<line x1="9" y1="3" x2="9" y2="21"></line>
 						</svg>
 					</button>
-					<span className="text-mainTxt">
+					<span className="text-mainTxt flex items-center gap-2">
 						{titleContext.title ?? getActiveLink(pathname)?.label}
+						{titleContext.author && (
+							<>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 640 640"
+									className="w-1 fill-accent mx-2">
+									<path d="M64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z" />
+								</svg>
+								{titleContext.author}
+							</>
+						)}
 					</span>
 				</div>
 				<div className="header-right flex items-center gap-6">
