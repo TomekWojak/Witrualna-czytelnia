@@ -87,3 +87,12 @@ body {
 		scroll-padding-top: 150px;
 	}
 }
+
+@keyframes loadingBar {
+	from {
+		width: 0;
+	}
+	to {
+		width: 100%;
+	}
+}

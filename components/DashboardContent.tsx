@@ -11,9 +11,23 @@ export default function DashboardContent({
 	onDesktopAsideOpen,
 	inputRefs,
 	onDropboxOpen,
+	setIsFileLoading,
+	setUploadingFileInfo,
 }: frameProps) {
 	const pathname = usePathname();
 	const titleContext = useContext(HeaderTitleContext);
+
+	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		setIsFileLoading(true);
+		const { success, message } = await handleImportedFile(e);
+
+		setUploadingFileInfo({ success, message });
+		setIsFileLoading(false);
+
+		setTimeout(() => {
+			setUploadingFileInfo(null);
+		}, 5000);
+	};
 
 	const handleDesktopNav = () => {
 		onDesktopAsideOpen((prev) => {
@@ -103,7 +117,7 @@ export default function DashboardContent({
 					</button>
 					<input
 						ref={inputRefs}
-						onChange={handleImportedFile}
+						onChange={handleFileUpload}
 						type="file"
 						accept=".epub,.pdf,.mobi"
 						className="hidden"
