@@ -118,7 +118,7 @@ const getChapterContent = async (
 	for (const chapter of chapterParts) {
 		const path: string = `${prefix}/${chapter}`;
 		const chapterData = results.file(path);
-
+		
 		if (!chapterData) {
 			console.log("Nieprawidłowa ścieżka pliku lub plik uszkodzony");
 			return;

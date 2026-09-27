@@ -252,13 +252,14 @@ export default function DashboardAside({
 						<>
 							<button
 								onClick={() => setIsUserPanelOpen((p) => !p)}
-								className="flex items-center justify-center w-7 h-7 rounded-full bg-linear-to-br from-accent to-accentSecondary text-xs cursor-pointer text-panel">
+								className="flex items-center justify-center w-7 h-7 rounded-full bg-linear-to-br from-accent to-accentSecondary text-xs cursor-pointer text-panel overflow-hidden">
 								{userData.avatar_url ? (
 									<Image
 										src={userData.avatar_url}
 										width={28}
 										height={28}
 										alt="Avatar użytkownika"
+										className="w-full h-full object-cover object-center"
 									/>
 								) : (
 									userData.name && userData.name[0]

@@ -12,16 +12,25 @@ export default function Profile() {
 	const avatarInputRefs = useRef<HTMLInputElement>(null);
 	const [usernameValue, setUsernameValue] = useState("");
 	const [textareaValue, setTextareaValue] = useState("");
-	const [initialData, setInitalData] = useState({
+	const [initialData, setInitalData] = useState<{
+		name: string;
+		bio: string;
+		avatar_url: string | null;
+	}>({
 		name: "",
 		bio: "",
-		// avatar_url: "",
+		avatar_url: null,
 	});
+	const [pendingAvatarUrl, setPendingAvatarUrl] = useState<string | null>(
+		null,
+	);
 	const [userId, setUserId] = useState<string>("");
 	const [isLoading, setIsLoading] = useState(false);
 
 	const isDirty =
-		usernameValue !== initialData.name || textareaValue !== initialData.bio;
+		usernameValue !== initialData.name ||
+		textareaValue !== initialData.bio ||
+		pendingAvatarUrl !== null;
 
 	const validateField = (
 		e:
@@ -37,28 +46,57 @@ export default function Profile() {
 		return false;
 	};
 
-	const handleUserImage = (
+	const handleUserImage = async (
 		e: React.ChangeEvent<HTMLInputElement, HTMLInputElement>,
 	) => {
-		console.log(e.target.files?.[0]);
+		const file = e.target.files?.[0];
+		if (!file || !userId) return;
+
+		const ext = file.name.split(".").pop();
+		const path = `${userId}/avatar.${ext}`;
+
+		const { error: uploadError } = await supabaseClient.storage
+			.from("avatars")
+			.upload(path, file, { upsert: true });
+
+		if (uploadError) {
+			console.error(uploadError);
+			return;
+		}
+
+		const {
+			data: { publicUrl },
+		} = supabaseClient.storage.from("avatars").getPublicUrl(path);
+
+		const avatarUrl = `${publicUrl}?t=${Date.now()}`;
+
+		setPendingAvatarUrl(avatarUrl);
+		setUserData((prev) =>
+			prev
+				? { ...prev, avatar_url: avatarUrl }
+				: { name: "", bio: "", avatar_url: avatarUrl, plan: "" },
+		);
 	};
 	const handleSave = async () => {
 		try {
 			setIsLoading(true);
 
+			const avatar_url = pendingAvatarUrl ?? initialData.avatar_url;
+
 			await supabaseClient
 				.from("profiles")
-				.update({ name: usernameValue, bio: textareaValue })
+				.update({ name: usernameValue, bio: textareaValue, avatar_url })
 				.eq("id", userId);
 
-			setInitalData({ name: usernameValue, bio: textareaValue });
+			setInitalData({ name: usernameValue, bio: textareaValue, avatar_url });
+			setPendingAvatarUrl(null);
 			setUserData((prev) =>
 				prev
-					? { ...prev, name: usernameValue, bio: textareaValue }
+					? { ...prev, name: usernameValue, bio: textareaValue, avatar_url }
 					: {
 							name: usernameValue,
 							bio: textareaValue,
-							avatar_url: null,
+							avatar_url,
 							plan: "",
 						},
 			);
@@ -81,7 +119,7 @@ export default function Profile() {
 
 			const { data, error } = await supabaseClient
 				.from("profiles")
-				.select("name, bio")
+				.select("name, bio, avatar_url")
 				.eq("id", user.id)
 				.single();
 
@@ -91,13 +129,22 @@ export default function Profile() {
 			}
 
 			setUserId(user.id);
-			setInitalData({ name: data.name ?? "", bio: data.bio ?? "" });
+			setInitalData({
+				name: data.name ?? "",
+				bio: data.bio ?? "",
+				avatar_url: data.avatar_url ?? null,
+			});
 			setUsernameValue(data.name ?? "");
 			setTextareaValue(data.bio ?? "");
 			setUserData((prev) =>
 				prev
-					? { ...prev, name: data.name, bio: data.bio }
-					: { name: data.name, bio: data.bio, avatar_url: null, plan: "" },
+					? { ...prev, name: data.name, bio: data.bio, avatar_url: data.avatar_url }
+					: {
+							name: data.name,
+							bio: data.bio,
+							avatar_url: data.avatar_url,
+							plan: "",
+						},
 			);
 		};
 		getData();
@@ -117,6 +164,7 @@ export default function Profile() {
 							width={28}
 							height={28}
 							alt="Avatar użytkownika"
+							className="w-20 aspect-square rounded-full shrink-0 object-cover object-center"
 						/>
 					) : (
 						<div className="w-20 flex items-center justify-center text-panel aspect-square rounded-full bg-accent">
