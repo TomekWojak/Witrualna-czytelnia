@@ -95,7 +95,9 @@ export default function DashboardAside({
 						Archetyp
 					</span>
 				</div>
-				<nav aria-label="Nawigacja główna">
+				<nav
+					aria-label="Nawigacja główna"
+					className="flex-1 min-h-0 overflow-y-auto scrollbar-accent">
 					<span className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent">
 						Główne
 					</span>
