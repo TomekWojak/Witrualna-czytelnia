@@ -11,15 +11,15 @@ export const getBook = async (
 
 	const { data, error } = await supabaseClient
 		.from("books")
-		.select("title,author")
+		.select("title,author,current_chapter_index")
 		.eq("id", slug)
 		.single();
 
 	if (error) {
-		return { success: false, message: "Błąd pobierania autora i tytułu" };
+		return { success: false, message: "Błąd pobierania informacji o książce" };
 	}
 
-	const { title, author } = data;
+	const { title, author, current_chapter_index } = data;
 
 	const { data: chapters, error: chaptersError } = await supabaseClient
 		.from("chapters")
@@ -31,5 +31,12 @@ export const getBook = async (
 		return { success: false, message: "Błąd pobierania rozdziałów" };
 	}
 
-	return { success: true, title, author, chapters };
+	return {
+		success: true,
+		title,
+		author,
+		chapters,
+		current_chapter_index,
+		book_id: slug,
+	};
 };

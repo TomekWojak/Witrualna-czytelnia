@@ -98,9 +98,9 @@ export default function DashboardAside({
 				<nav
 					aria-label="Nawigacja główna"
 					className="flex-1 min-h-0 overflow-y-auto scrollbar-accent md:overflow-y-visible">
-					<span className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent">
+					<p className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent text-left">
 						Główne
-					</span>
+					</p>
 					<ul className="p-2 flex flex-col gap-1">
 						{asideLinksMain.map((link) => {
 							const isActive = getActiveLink(pathname)?.href === link.href;
@@ -130,9 +130,9 @@ export default function DashboardAside({
 							);
 						})}
 					</ul>
-					<span className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent">
+					<p className="uppercase block p-4 pt-6 pb-2 font-medium tracking-widest text-xs text-accent text-left">
 						Panel
-					</span>
+					</p>
 					<ul className="p-2 flex flex-col gap-1">
 						{asideLinks.map((link) => {
 							const isActive = getActiveLink(pathname)?.href === link.href;

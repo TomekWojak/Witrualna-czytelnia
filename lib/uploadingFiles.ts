@@ -118,6 +118,7 @@ const readEpub = async (
 			user_id: user.id,
 			epub_path: bookUrl,
 			file_hash: hash,
+			chapter_count: chaptersContent.length,
 		})
 		.select("id");
 

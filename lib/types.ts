@@ -40,5 +40,21 @@ export type BookInfo =
 			chapters: {
 				content: string;
 			}[];
+			book_id: string;
+			current_chapter_index: number;
+	  }
+	| { success: false; message: string };
+
+export type BookData =
+	| {
+			success: true;
+			books: {
+				id: string;
+				cover_url: string | null;
+				title: string;
+				author: string;
+				current_chapter_index: number;
+				chapter_count: number;
+			}[];
 	  }
 	| { success: false; message: string };

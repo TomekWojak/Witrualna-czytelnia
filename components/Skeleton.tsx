@@ -55,3 +55,22 @@ export function BookViewSkeleton() {
 	);
 }
 
+export function MyBooksSkeleton() {
+	return (
+		<ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+			{Array.from({ length: 10 }).map((_, i) => (
+				<li key={i} className="flex flex-col gap-2">
+					<div className="relative overflow-hidden aspect-2/3 w-full rounded-lg bg-accent/20">
+						<div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite_alternate] bg-linear-to-r from-transparent via-white/30 to-transparent" />
+					</div>
+					<div className="relative overflow-hidden w-4/5 h-4 bg-accent/20 rounded-md">
+						<div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite_alternate] bg-linear-to-r from-transparent via-white/30 to-transparent" />
+					</div>
+					<div className="relative overflow-hidden w-1/2 h-3 bg-accent/20 rounded-md">
+						<div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite_alternate] bg-linear-to-r from-transparent via-white/30 to-transparent" />
+					</div>
+				</li>
+			))}
+		</ul>
+	);
+}

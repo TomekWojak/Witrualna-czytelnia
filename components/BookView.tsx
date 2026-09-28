@@ -1,6 +1,6 @@
 "use client";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
-
+import { supabaseClient } from "@/lib/supabase";
 import { useContext, useEffect, useRef, useState } from "react";
 import type { BookInfo } from "@/lib/types";
 import { UploadInfoContext } from "@/lib/UploadInfoContext";
@@ -93,7 +93,9 @@ function ReaderOptionMenu({
 export default function BookView({ response }: { response: BookInfo }) {
 	const titleContext = useContext(HeaderTitleContext);
 	const uploadInfoContext = useContext(UploadInfoContext);
-	const [pageIndex, setPageIndex] = useState(0);
+	const [pageIndex, setPageIndex] = useState<number>(
+		response.success ? response.current_chapter_index : 0,
+	);
 	const bookContainerRef = useRef<HTMLDivElement | null>(null);
 
 	const [openMenu, setOpenMenu] = useState<ReaderMenu | null>(null);
@@ -105,6 +107,15 @@ export default function BookView({ response }: { response: BookInfo }) {
 		LINE_HEIGHT_OPTIONS[1],
 	);
 	const [selectedSound, setSelectedSound] = useState(SOUND_OPTIONS[0]);
+
+	const handlePageChange = async (newIndex: number) => {
+		if (!response.success) return;
+
+		await supabaseClient
+			.from("books")
+			.update({ current_chapter_index: newIndex })
+			.eq("id", response.book_id);
+	};
 
 	const toggleMenu = (menu: ReaderMenu) =>
 		setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -219,7 +230,11 @@ export default function BookView({ response }: { response: BookInfo }) {
 				<div className="pages flex gap-3 items-center">
 					<button
 						disabled={pageIndex === 0}
-						onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+						onClick={async () => {
+							const newIndex = Math.max(0, pageIndex - 1);
+							setPageIndex(newIndex);
+							await handlePageChange(newIndex);
+						}}
 						className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel shadow-sm transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -241,9 +256,11 @@ export default function BookView({ response }: { response: BookInfo }) {
 
 					<button
 						disabled={pageIndex === chapters.length - 1}
-						onClick={() =>
-							setPageIndex((p) => Math.min(chapters.length - 1, p + 1))
-						}
+						onClick={async () => {
+							const newIndex = Math.min(chapters.length - 1, pageIndex + 1);
+							setPageIndex(newIndex);
+							await handlePageChange(newIndex);
+						}}
 						className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel shadow-sm transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
