@@ -19,6 +19,8 @@ body {
 	--premium-via: #ec4899;
 	--premium-to: #f97316;
 
+	--book-font-size: 1.2rem;
+
 	scroll-padding-top: 100px;
 }
 
@@ -96,4 +98,61 @@ body {
 	to {
 		width: 100%;
 	}
+}
+
+.book-content {
+	line-height: 1.85;
+	font-size:var(--book-font-size);
+	color: var(--text-color);
+}
+.book-content p {
+	margin-bottom: 1.25em;
+	text-indent: 1.5em;
+}
+.book-content p:first-of-type {
+	text-indent: 0;
+}
+.book-content h1,
+.book-content h2,
+.book-content h3 {
+	font-family: var(--font-playfairDisplay);
+	text-align: center;
+	margin: 2em 0 1em;
+	color: var(--text-color);
+}
+.book-content h1 {
+	font-size: 2rem;
+}
+.book-content blockquote {
+	border-left: 2px solid var(--accent);
+	padding-left: 1em;
+	margin: 1.5em 0;
+	font-style: italic;
+	color: color-mix(in srgb, var(--text-color) 70%, transparent);
+}
+.book-content a {
+	color: var(--accent);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.book-content ul,
+.book-content ol {
+	margin: 1.25em 0;
+	padding-left: 1.5em;
+}
+.book-content li {
+	margin-bottom: 0.5em;
+}
+.book-content hr {
+	border: none;
+	border-top: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+	margin: 2.5em auto;
+	width: 6rem;
+}
+.book-content img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 0.5rem;
+	margin: 1.5em auto;
+	display: block;
 }

@@ -6,14 +6,11 @@ type ReadEpubResults =
 	| { success: false; error: string; code?: string };
 
 export const handleImportedFile = async (
-	e: React.ChangeEvent<HTMLInputElement>,
+	file: File | undefined,
 ): Promise<ImportResult> => {
-	const file = e.target.files?.[0];
-
 	if (!file) return { success: false, message: "Błąd wgrywania pliku" };
 
 	const name = file.name.toLowerCase();
-	e.target.value = "";
 
 	if (!name.endsWith(".epub") && !name.endsWith(".pdf")) {
 		return { success: false, message: "Nieprawidłowy format pliku!" };
@@ -37,7 +34,7 @@ export const handleImportedFile = async (
 			return { success: false, message: "Błąd podczas wczytywania ebooka" };
 		}
 
-		setChaptersToDatabase(results.chaptersContent, results.id);
+		await setChaptersToDatabase(results.chaptersContent, results.id);
 
 		return {
 			success: true,
@@ -124,7 +121,7 @@ const readEpub = async (
 		if (bookIdStatus.error?.code === "23505") {
 			return {
 				success: false,
-				error: "c",
+				error: "Książka istnieje w bazie",
 				code: bookIdStatus.error.code,
 			};
 		}

@@ -4,10 +4,7 @@ export type frameProps = {
 	onDesktopAsideOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	inputRefs: React.RefObject<HTMLInputElement | null>;
 	onDropboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
-	setIsFileLoading: React.Dispatch<React.SetStateAction<boolean>>;
-	setUploadingFileInfo: React.Dispatch<
-		React.SetStateAction<ImportResult | null>
-	>;
+	handleFileUpload: (file: File | undefined) => Promise<void>;
 };
 export type HeaderContextProps = {
 	title: string | undefined;
@@ -45,9 +42,3 @@ export type BookInfo =
 			}[];
 	  }
 	| { success: false; message: string };
-
-// export type BookStructure = {
-// 	title: string;
-// 	author: string;
-// 	chapters: { content: string }[];
-// };

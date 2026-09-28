@@ -1,5 +1,6 @@
 import type { frameProps } from "@/lib/types";
 import { handleImportedFile } from "@/lib/uploadingFiles";
+
 import { usePathname } from "next/navigation";
 import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
 import { useContext } from "react";
@@ -12,26 +13,10 @@ export default function DashboardContent({
 	onDesktopAsideOpen,
 	inputRefs,
 	onDropboxOpen,
-	setIsFileLoading,
-	setUploadingFileInfo,
+	handleFileUpload,
 }: frameProps) {
 	const pathname = usePathname();
 	const titleContext = useContext(HeaderTitleContext);
-	const router = useRouter();
-
-	const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-		setIsFileLoading(true);
-		const fileData = await handleImportedFile(e);
-
-		if (fileData.success && fileData.id) {
-			router.push(`/dashboard/czytam/${fileData.id}`);
-		}
-
-		setUploadingFileInfo(fileData);
-
-		setIsFileLoading(false);
-		onDropboxOpen((p) => !p);
-	};
 
 	const handleDesktopNav = () => {
 		onDesktopAsideOpen((prev) => {
@@ -90,10 +75,10 @@ export default function DashboardContent({
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									viewBox="0 0 640 640"
-									className="w-1 fill-accent mx-2">
+									className="w-1 hidden lg:block fill-accent mx-2">
 									<path d="M64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z" />
 								</svg>
-								{titleContext.author}
+								<span className="hidden lg:inline">{titleContext.author}</span>
 							</>
 						)}
 					</span>
@@ -132,7 +117,11 @@ export default function DashboardContent({
 					</button>
 					<input
 						ref={inputRefs}
-						onChange={handleFileUpload}
+						onChange={(e) => {
+							const file = e.target.files?.[0];
+							e.target.value = "";
+							handleFileUpload(file);
+						}}
 						type="file"
 						accept=".epub,.pdf,.mobi"
 						className="hidden"
