@@ -1,7 +1,7 @@
 "use client";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import type { BookInfo } from "@/lib/types";
 import { UploadInfoContext } from "@/lib/UploadInfoContext";
 import Image from "next/image";
@@ -94,6 +94,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 	const titleContext = useContext(HeaderTitleContext);
 	const uploadInfoContext = useContext(UploadInfoContext);
 	const [pageIndex, setPageIndex] = useState(0);
+	const bookContainerRef = useRef<HTMLDivElement | null>(null);
 
 	const [openMenu, setOpenMenu] = useState<ReaderMenu | null>(null);
 	const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0]);
@@ -120,11 +121,19 @@ export default function BookView({ response }: { response: BookInfo }) {
 		titleContext.setTitle(response.title);
 		titleContext.setAuthor(response.author);
 
+		if (bookContainerRef.current) {
+			bookContainerRef.current.style.scrollBehavior = "smooth";
+		}
+
 		return () => {
 			titleContext.setTitle(undefined);
 			titleContext.setAuthor(undefined);
 		};
 	}, [titleContext, response, uploadInfoContext]);
+
+	useEffect(() => {
+		bookContainerRef.current?.scrollTo(0, 0);
+	}, [pageIndex]);
 
 	if (!response.success) {
 		return (
@@ -190,7 +199,9 @@ export default function BookView({ response }: { response: BookInfo }) {
 	const { title, author, chapters } = response;
 
 	return (
-		<div className="container mx-auto p-4 py-10 w-full h-full bg-paper text-mainTxt border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
+		<div
+			ref={bookContainerRef}
+			className="container mx-auto p-4 py-10 w-full h-full bg-paper text-mainTxt border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
 			<div className="text-center pb-6 border-b border-accent/20">
 				<h1 className="text-3xl sm:text-4xl font-semibold italic">{title}</h1>
 				<div className="mx-auto mt-4 h-px w-12 bg-accent" />

@@ -90,6 +90,10 @@ const readEpub = async (
 		chapterParts,
 	);
 
+	if (!chaptersContent || chaptersContent.length === 0) {
+		return { success: false, error: "Błąd podczas wczytywania ebooka" };
+	}
+
 	const bookPath = `${user.id}/${book.name}`;
 
 	const { error: uploadError } = await supabaseClient.storage
@@ -225,10 +229,11 @@ const getChapterContent = async (
 ) => {
 	const promises: Promise<string>[] = [];
 	const arr: string[] = base.split("/");
-	const prefix: string = arr[0];
+	arr.pop();
+	const prefix: string = arr.join("/");
 
 	for (const chapter of chapterParts) {
-		const path: string = `${prefix}/${chapter}`;
+		const path: string = prefix ? `${prefix}/${chapter}` : chapter;
 		const chapterData = results.file(path);
 
 		if (!chapterData) {
