@@ -35,13 +35,15 @@ const LINE_HEIGHT_VALUES: Record<string, string> = {
 	Maksymalny: "2.6",
 };
 const LINE_HEIGHT_OPTIONS = Object.keys(LINE_HEIGHT_VALUES);
-const SOUND_OPTIONS = [
-	"Wyłączony",
-	"Deszcz",
-	"Kominek",
-	"Kawiarnia",
-	"Biały szum",
-];
+const SOUND_VALUES: Record<string, string> = {
+	Wyłączony: "",
+	Deszcz: "/audios/rain-sound.mp3",
+	Kominek: "/audios/fireplace-sound.mp3",
+	Kawiarnia: "/audios/cafe-sound.mp3",
+	"Biały szum": "/audios/white-noise-sound.mp3",
+	Ocean: "/audios/ocean-sound.mp3",
+};
+const SOUND_OPTIONS = Object.keys(SOUND_VALUES);
 
 type ReaderMenu = "font" | "fontSize" | "lineHeight" | "sound";
 
@@ -146,6 +148,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 		response.success ? response.current_chapter_index : 0,
 	);
 	const bookContainerRef = useRef<HTMLDivElement | null>(null);
+	const audioRef = useRef<HTMLAudioElement>(null);
 
 	const [openMenu, setOpenMenu] = useState<ReaderMenu | null>(null);
 	const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0]);
@@ -274,7 +277,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 				<blockquote className="italic text-mainTxt/70">
 					„Czasem to, co nas zatrzymuje, prowadzi do czegoś piękniejszego.”
 				</blockquote>
-				<span className="text-sm text-mainTxt/50">— Paulo Coelho</span>
+				<span className="text-sm text-mainTxt/50">- Paulo Coelho</span>
 			</div>
 		);
 	}
@@ -497,8 +500,18 @@ export default function BookView({ response }: { response: BookInfo }) {
 						options={SOUND_OPTIONS}
 						selected={selectedSound}
 						onSelect={(value) => {
-							setSelectedSound(value);
+							const sound = value;
+							setSelectedSound(sound);
 							setOpenMenu(null);
+
+							if (audioRef.current) {
+								if (SOUND_VALUES[sound] !== "") {
+									audioRef.current.src = SOUND_VALUES[sound];
+									audioRef.current.play();
+								} else {
+									audioRef.current.pause();
+								}
+							}
 						}}
 						isOpen={openMenu === "sound"}
 						onToggle={() => toggleMenu("sound")}
@@ -520,6 +533,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 					/>
 				</div>
 			</div>
+			<audio loop ref={audioRef} src="/audios/cafe-sound.mp3"></audio>
 		</div>
 	);
 }
