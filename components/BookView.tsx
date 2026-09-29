@@ -212,7 +212,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 	return (
 		<div
 			ref={bookContainerRef}
-			className="container mx-auto p-4 py-10 w-full h-full bg-paper text-mainTxt border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
+			className="container px-0 mx-auto sm:px-4 py-10 w-full h-full bg-none sm:bg-paper text-mainTxt sm:border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
 			<div className="text-center pb-6 border-b border-accent/20">
 				<h1 className="text-3xl sm:text-4xl font-semibold italic">{title}</h1>
 				<div className="mx-auto mt-4 h-px w-12 bg-accent" />

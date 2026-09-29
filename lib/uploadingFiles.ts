@@ -80,6 +80,39 @@ const readEpub = async (
 	const { title, author } = getMetadata(manifestData);
 
 	const manifestItems = getManifest(manifestData);
+
+	const cover = getCoverHref(manifestData, manifestItems);
+	let coverUrl: string | null = null;
+
+	if (cover) {
+		const coverPath = resolveEpubPath(opfPath, cover);
+		const coverFile = results.file(coverPath);
+
+		if (!coverFile) {
+			console.error("Nie znaleziono pliku okładki pod ścieżką", coverPath);
+		} else {
+			const coverData = await coverFile.async("blob");
+			const coverExt = cover.split(".").pop();
+			const coverStoragePath = `${user.id}/${book.name}-cover.${coverExt}`;
+
+			const { error: coverUploadError } = await supabaseClient.storage
+				.from("covers")
+				.upload(coverStoragePath, coverData, { upsert: true });
+
+			if (coverUploadError) {
+				console.error(coverUploadError);
+			} else {
+				const {
+					data: { publicUrl: coverPublicUrl },
+				} = supabaseClient.storage
+					.from("covers")
+					.getPublicUrl(coverStoragePath);
+
+				coverUrl = `${coverPublicUrl}?t=${Date.now()}`;
+			}
+		}
+	}
+
 	const spine = getSpine(manifestData);
 
 	const chapterParts = getChapterPaths(spine, manifestItems);
@@ -119,6 +152,7 @@ const readEpub = async (
 			epub_path: bookUrl,
 			file_hash: hash,
 			chapter_count: chaptersContent.length,
+			cover_url: coverUrl,
 		})
 		.select("id");
 
@@ -199,6 +233,24 @@ const getManifest = (data: string) => {
 	return mappedItems;
 };
 
+const getCoverHref = (
+	data: string,
+	manifestItems: Map<string, string>,
+): string | undefined => {
+	const domParser = new DOMParser().parseFromString(data, "application/xml");
+
+	const coverItem = domParser.querySelector('item[properties~="cover-image"]');
+
+	if (coverItem) {
+		return coverItem.getAttribute("href") ?? undefined;
+	}
+
+	const coverMeta = domParser.querySelector('meta[name="cover"]');
+	const coverId = coverMeta?.getAttribute("content");
+
+	return coverId ? manifestItems.get(coverId) : undefined;
+};
+
 const getSpine = (data: string) => {
 	const domParser = new DOMParser().parseFromString(data, "application/xml");
 	const spineItems = Array.from(domParser.querySelectorAll("spine itemref"));
@@ -223,18 +275,23 @@ const getChapterPaths = (
 	return finalArr.filter((el) => el !== "");
 };
 
+const resolveEpubPath = (base: string, relativePath: string) => {
+	const arr: string[] = base.split("/");
+	arr.pop();
+	const prefix: string = arr.join("/");
+
+	return prefix ? `${prefix}/${relativePath}` : relativePath;
+};
+
 const getChapterContent = async (
 	results: JSZip,
 	base: string,
 	chapterParts: string[],
 ) => {
 	const promises: Promise<string>[] = [];
-	const arr: string[] = base.split("/");
-	arr.pop();
-	const prefix: string = arr.join("/");
 
 	for (const chapter of chapterParts) {
-		const path: string = prefix ? `${prefix}/${chapter}` : chapter;
+		const path: string = resolveEpubPath(base, chapter);
 		const chapterData = results.file(path);
 
 		if (!chapterData) {
