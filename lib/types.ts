@@ -20,7 +20,7 @@ export type UserData = {
 };
 
 export type ImportResult =
-	| { success: true; message: string; id: string }
+	| { success: true; message: string; id?: string }
 	| { success: false; message: string };
 
 export type UserContextProps = {

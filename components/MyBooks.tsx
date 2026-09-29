@@ -15,7 +15,6 @@ export default function MyBooks({
 }) {
 	const uploadInfoContext = useContext(UploadInfoContext);
 	const [books, setBooks] = useState(bookData.success ? bookData.books : []);
-	const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!bookData.success) {
@@ -25,8 +24,6 @@ export default function MyBooks({
 	}, [bookData, uploadInfoContext]);
 
 	const handleAddToFavorites = async (id: string) => {
-		setOpenMenuId(null);
-
 		const { error } = await supabaseClient
 			.from("books")
 			.update({ is_favorite: true })
@@ -51,8 +48,6 @@ export default function MyBooks({
 	};
 
 	const handleRemoveFromFavorites = async (id: string) => {
-		setOpenMenuId(null);
-
 		const { error } = await supabaseClient
 			.from("books")
 			.update({ is_favorite: false })
@@ -77,14 +72,21 @@ export default function MyBooks({
 	};
 
 	const handleRemoveFromReading = async (id: string) => {
-		setOpenMenuId(null);
-
 		const { error } = await supabaseClient.from("books").delete().eq("id", id);
 
 		if (error) {
 			console.error(error);
+			uploadInfoContext.setUploadingFileInfo({
+				success: false,
+				message: "Wystąpił problem z usuwaniem pozycji z listy",
+			});
 			return;
 		}
+
+		uploadInfoContext.setUploadingFileInfo({
+			success: true,
+			message: "Pomyślnie usunięto pozycję z listy",
+		});
 
 		setBooks((prev) => prev.filter((book) => book.id !== id));
 	};
@@ -237,106 +239,72 @@ export default function MyBooks({
 									</div>
 								</div>
 							</Link>
+							<div className="controls mt-3 flex items-center justify-center gap-2">
+								<button className="flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										className="feather feather-check-circle w-4.5">
+										<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+										<polyline points="22 4 12 14.01 9 11.01"></polyline>
+									</svg>
+								</button>
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										if (is_favorite) {
+											handleRemoveFromFavorites(id);
+										} else {
+											handleAddToFavorites(id);
+										}
+									}}
+									className="flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill={is_favorite ? "currentColor" : "none"}
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										className="feather feather-heart w-4.5">
+										<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+									</svg>
+								</button>
 
-							<button
-								aria-label="Więcej opcji"
-								onClick={(e) => {
-									e.stopPropagation();
-									setOpenMenuId((prev) => (prev === id ? null : id));
-								}}
-								className="absolute top-2 right-2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-panel/80 backdrop-blur-sm text-mainTxt cursor-pointer transition-colors hover:bg-panel">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									width="16"
-									height="16"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round">
-									<circle cx="12" cy="12" r="1"></circle>
-									<circle cx="12" cy="5" r="1"></circle>
-									<circle cx="12" cy="19" r="1"></circle>
-								</svg>
-							</button>
-
-							{openMenuId === id && (
-								<div className="absolute top-10 right-2 z-20 w-50 p-2 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden">
-									<button
-										onClick={(e) => {
-											e.stopPropagation();
-											setOpenMenuId(null);
-										}}
-										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="14"
-											height="14"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											className="shrink-0">
-											<polyline points="20 6 9 17 4 12"></polyline>
-										</svg>
-										Przeczytane
-									</button>
-									<button
-										onClick={(e) => {
-											e.stopPropagation();
-											if (is_favorite) {
-												handleRemoveFromFavorites(id);
-											} else {
-												handleAddToFavorites(id);
-											}
-										}}
-										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="16"
-											height="16"
-											viewBox="0 0 24 24"
-											fill={is_favorite ? "currentColor" : "none"}
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											className="shrink-0">
-											<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-										</svg>
-										{is_favorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
-									</button>
-
-									<button
-										onClick={(e) => {
-											e.stopPropagation();
-											handleRemoveFromReading(id);
-										}}
-										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 cursor-pointer transition-colors hover:bg-red-500/10 rounded-lg">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="16"
-											height="16"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											className="shrink-0">
-											<polyline points="3 6 5 6 21 6"></polyline>
-											<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-											<path d="M10 11v6"></path>
-											<path d="M14 11v6"></path>
-											<path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
-										</svg>
-										Usuń z czytanych
-									</button>
-								</div>
-							)}
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+										handleRemoveFromReading(id);
+									}}
+									className="flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 cursor-pointer transition-colors hover:bg-red-500/10 rounded-lg">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="24"
+										height="24"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										className="feather feather-trash-2 w-4.5">
+										<polyline points="3 6 5 6 21 6"></polyline>
+										<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+										<line x1="10" y1="11" x2="10" y2="17"></line>
+										<line x1="14" y1="11" x2="14" y2="17"></line>
+									</svg>
+								</button>
+							</div>
 						</li>
 					);
 				},

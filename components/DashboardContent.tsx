@@ -72,12 +72,8 @@ export default function DashboardContent({
 						{titleContext.title ?? getActiveLink(pathname)?.label}
 						{titleContext.author && (
 							<>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 640 640"
-									className="w-1 hidden lg:block fill-accent mx-2">
-									<path d="M64 320C64 178.6 178.6 64 320 64C461.4 64 576 178.6 576 320C576 461.4 461.4 576 320 576C178.6 576 64 461.4 64 320z" />
-								</svg>
+								<div className="ml-2 w-px h-6 bg-accent/30 shrink-0 hidden lg:block fill-accent mx-2" />
+
 								<span className="hidden lg:inline">{titleContext.author}</span>
 							</>
 						)}

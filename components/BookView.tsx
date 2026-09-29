@@ -110,7 +110,13 @@ function ReaderOptionMenu({
 			</button>
 
 			{isOpen && (
-				<ul className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 p-2 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden z-10">
+				<ul className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-50 w-max p-2 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden z-10">
+					<li className="px-3 pb-2">
+						<span className="block pt-1 text-xs font-semibold uppercase tracking-wide text-accent/70">
+							{label}
+						</span>
+						<span className="mt-2 block h-px bg-accent/20 rounded-full" />
+					</li>
 					{options.map((option) => (
 						<li key={option}>
 							<button
@@ -223,7 +229,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 
 	if (!response.success) {
 		return (
-			<div className="flex flex-col items-center text-center p-4 py-2 w-full h-full bg-paper text-mainTxt border border-accent/30 rounded-2xl gap-2 font-lora overflow-y-auto">
+			<div className="flex flex-col items-center text-center p-4 py-2 w-full h-full bg-paper text-mainTxt border border-accent/30 rounded-2xl gap-2 font-lora overflow-y-auto scrollbar-accent">
 				<Image
 					className="block w-[min(100%,450px)]"
 					width={1659}
@@ -287,43 +293,53 @@ export default function BookView({ response }: { response: BookInfo }) {
 	return (
 		<div
 			ref={bookContainerRef}
-			className="container px-0 mx-auto lg:px-4 py-10 w-full h-full bg-none lg:bg-paper text-mainTxt lg:border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
-			<div className="text-center pb-6 border-b border-accent/20">
-				<div className="flex items-center">
-					<button
-						className="p-1 rounded-lg cursor-pointer hover:bg-accent/5 transition-colors duration-300 shrink-0"
-						onClick={() => router.push("/dashboard/czytam")}>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							className="feather feather-arrow-left stroke-accent">
-							<line x1="19" y1="12" x2="5" y2="12"></line>
-							<polyline points="12 19 5 12 12 5"></polyline>
-						</svg>
-					</button>
-					<h1 className="text-3xl sm:text-4xl font-semibold italic grow text-center">
-						{title}
-					</h1>
-				</div>
-				<div className="mx-auto mt-4 h-px w-12 bg-accent" />
-				<p className="mt-4 text-xs sm:text-sm uppercase tracking-[0.25em] text-mainTxt/60">
-					{author}
-				</p>
-			</div>
+			className="w-full h-full text-mainTxt font-lora overflow-y-auto scrollbar-accent">
 			<div
-				className="book-content"
-				dangerouslySetInnerHTML={{
-					__html: chapters[pageIndex]?.content,
-				}}></div>
+				aria-hidden
+				className="fixed -z-10 top-10 -left-24 w-80 h-80 rounded-full bg-accent/5 blur-3xl pointer-events-none"
+			/>
+			<div
+				aria-hidden
+				className="fixed -z-10 bottom-10 -right-24 w-96 h-96 rounded-full bg-accentSecondary/5 blur-3xl pointer-events-none"
+			/>
+			<div className="container px-0 mx-auto lg:px-4 py-20 w-full space-y-5">
+				<div className="text-center pb-6 border-b border-accent/20">
+					<div className="flex items-center">
+						<button
+							className="p-1 rounded-lg cursor-pointer hover:bg-accent/5 transition-colors duration-300 shrink-0"
+							onClick={() => router.push("/dashboard/czytam")}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								className="feather feather-arrow-left stroke-accent">
+								<line x1="19" y1="12" x2="5" y2="12"></line>
+								<polyline points="12 19 5 12 12 5"></polyline>
+							</svg>
+						</button>
+						<h1 className="text-3xl sm:text-4xl font-semibold italic grow text-center">
+							{title}
+						</h1>
+					</div>
+					<div className="mx-auto mt-4 h-px w-12 bg-accent" />
+					<p className="mt-4 text-xs sm:text-sm uppercase tracking-[0.25em] text-mainTxt/60">
+						{author}
+					</p>
+				</div>
+				<div
+					className="book-content px-4"
+					dangerouslySetInnerHTML={{
+						__html: chapters[pageIndex]?.content,
+					}}></div>
+			</div>
 
-			<div className="absolute bottom-0 sm:bottom-8 left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-220 mx-auto flex flex-col sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg">
+			<div className="absolute bottom-0 sm:bottom-2 left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-220 mx-auto flex flex-col sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg">
 				<div className="pages flex gap-3 items-center">
 					<button
 						disabled={pageIndex === 0}
