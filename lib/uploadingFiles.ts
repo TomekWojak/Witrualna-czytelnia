@@ -123,7 +123,9 @@ const readEpub = async (
 		chapterParts,
 	);
 
-	const chaptersContent = rawChaptersContent?.filter(isMeaningfulChapter);
+	const chaptersContent = rawChaptersContent
+		?.map(stripEmptyParagraphs)
+		.filter(isMeaningfulChapter);
 
 	if (!chaptersContent || chaptersContent.length === 0) {
 		return { success: false, error: "Błąd podczas wczytywania ebooka" };
@@ -251,6 +253,20 @@ const getCoverHref = (
 	const coverId = coverMeta?.getAttribute("content");
 
 	return coverId ? manifestItems.get(coverId) : undefined;
+};
+
+const stripEmptyParagraphs = (html: string): string => {
+	const doc = new DOMParser().parseFromString(html, "text/html");
+
+	doc.querySelectorAll("p").forEach((p) => {
+		const text = (p.textContent ?? "").replace(/ /g, "").trim();
+
+		if (!text) {
+			p.remove();
+		}
+	});
+
+	return doc.body.innerHTML;
 };
 
 const MIN_CHAPTER_TEXT_LENGTH = 100;

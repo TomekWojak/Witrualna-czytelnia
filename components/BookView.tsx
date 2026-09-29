@@ -284,7 +284,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 	return (
 		<div
 			ref={bookContainerRef}
-			className="container px-0 mx-auto sm:px-4 py-10 w-full h-full bg-none sm:bg-paper text-mainTxt sm:border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
+			className="container px-0 mx-auto lg:px-4 py-10 w-full h-full bg-none lg:bg-paper text-mainTxt lg:border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
 			<div className="text-center pb-6 border-b border-accent/20">
 				<div className="flex items-center">
 					<button
