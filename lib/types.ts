@@ -55,6 +55,7 @@ export type BookData =
 				author: string;
 				current_chapter_index: number;
 				chapter_count: number;
+				is_favorite: boolean;
 			}[];
 	  }
 	| { success: false; message: string };

@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Montserrat, Lora } from "next/font/google";
+import {
+	Playfair_Display,
+	Montserrat,
+	Lora,
+	Merriweather,
+} from "next/font/google";
 import "@/app/globals.css";
 
 const playfairDisplay = Playfair_Display({
@@ -13,6 +18,12 @@ const montserrat = Montserrat({
 
 const lora = Lora({
 	variable: "--font-lora",
+	subsets: ["latin"],
+});
+
+const merriweather = Merriweather({
+	variable: "--font-merriweather",
+	weight: ["300", "400", "700"],
 	subsets: ["latin"],
 });
 
@@ -41,7 +52,7 @@ export default function DashboardLayout({ children }: LayoutProps<"/">) {
 		<html
 			lang="en"
 			suppressHydrationWarning
-			className={`${montserrat.variable} ${playfairDisplay.variable} ${lora.variable} h-full antialiased scroll-smooth`}>
+			className={`${montserrat.variable} ${playfairDisplay.variable} ${lora.variable} ${merriweather.variable} h-full antialiased scroll-smooth`}>
 			<head>
 				<script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 			</head>

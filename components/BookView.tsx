@@ -7,21 +7,34 @@ import { UploadInfoContext } from "@/lib/UploadInfoContext";
 import Image from "next/image";
 import Link from "next/link";
 
-const FONT_OPTIONS = [
-	"Lora",
-	"Playfair Display",
-	"Montserrat",
-	"Georgia",
-	"Merriweather",
-];
-const FONT_SIZE_OPTIONS = ["Mała", "Średnia", "Duża", "Bardzo duża", "Ogromna"];
-const LINE_HEIGHT_OPTIONS = [
-	"Wąski",
-	"Normalny",
-	"Szeroki",
-	"Bardzo szeroki",
-	"Maksymalny",
-];
+import { useRouter } from "next/navigation";
+
+const FONT_FAMILY_VALUES: Record<string, string> = {
+	Lora: "var(--font-lora), serif",
+	"Playfair Display": "var(--font-playfairDisplay), serif",
+	Montserrat: "var(--font-montserrat), sans-serif",
+	Georgia: "Georgia, serif",
+	Merriweather: "var(--font-merriweather), serif",
+};
+const FONT_OPTIONS = Object.keys(FONT_FAMILY_VALUES);
+
+const FONT_SIZE_VALUES: Record<string, string> = {
+	Mała: "1rem",
+	Średnia: "1.2rem",
+	Duża: "1.35rem",
+	"Bardzo duża": "1.5rem",
+	Ogromna: "1.7rem",
+};
+const FONT_SIZE_OPTIONS = Object.keys(FONT_SIZE_VALUES);
+
+const LINE_HEIGHT_VALUES: Record<string, string> = {
+	Wąski: "1.5",
+	Normalny: "1.85",
+	Szeroki: "2.1",
+	"Bardzo szeroki": "2.35",
+	Maksymalny: "2.6",
+};
+const LINE_HEIGHT_OPTIONS = Object.keys(LINE_HEIGHT_VALUES);
 const SOUND_OPTIONS = [
 	"Wyłączony",
 	"Deszcz",
@@ -31,6 +44,42 @@ const SOUND_OPTIONS = [
 ];
 
 type ReaderMenu = "font" | "fontSize" | "lineHeight" | "sound";
+
+type ReaderPrefs = {
+	font: string;
+	fontSize: string;
+	lineHeight: string;
+};
+
+const isReaderPrefs = (value: unknown): value is ReaderPrefs => {
+	if (typeof value !== "object" || value === null) return false;
+
+	const data = value as Record<string, unknown>;
+
+	return (
+		typeof data.font === "string" &&
+		typeof data.fontSize === "string" &&
+		typeof data.lineHeight === "string"
+	);
+};
+
+const saveReaderPrefs = (prefs: ReaderPrefs) => {
+	localStorage.setItem("readerPrefs", JSON.stringify(prefs));
+};
+
+const getReaderPrefs = (): ReaderPrefs | undefined => {
+	const raw = localStorage.getItem("readerPrefs");
+	if (!raw) return undefined;
+
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		if (!isReaderPrefs(parsed)) return undefined;
+
+		return parsed;
+	} catch {
+		return undefined;
+	}
+};
 
 function ReaderOptionMenu({
 	label,
@@ -59,12 +108,12 @@ function ReaderOptionMenu({
 			</button>
 
 			{isOpen && (
-				<ul className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 py-1 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden z-10">
+				<ul className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-44 p-2 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden z-10">
 					{options.map((option) => (
 						<li key={option}>
 							<button
 								onClick={() => onSelect(option)}
-								className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors duration-200 hover:bg-accent/10 ${selected === option ? "font-semibold" : ""}`}>
+								className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors duration-200 hover:bg-accent/10 rounded-lg ${selected === option ? "font-semibold" : ""}`}>
 								{option}
 								{selected === option && (
 									<svg
@@ -107,6 +156,29 @@ export default function BookView({ response }: { response: BookInfo }) {
 		LINE_HEIGHT_OPTIONS[1],
 	);
 	const [selectedSound, setSelectedSound] = useState(SOUND_OPTIONS[0]);
+	const router = useRouter();
+
+	useEffect(() => {
+		const prefs = getReaderPrefs();
+		if (!prefs) return;
+
+		setSelectedFont(prefs.font);
+		setSelectedFontSize(prefs.fontSize);
+		setSelectedLineHeight(prefs.lineHeight);
+
+		document.documentElement.style.setProperty(
+			"--book-font-family",
+			FONT_FAMILY_VALUES[prefs.font],
+		);
+		document.documentElement.style.setProperty(
+			"--book-font-size",
+			FONT_SIZE_VALUES[prefs.fontSize],
+		);
+		document.documentElement.style.setProperty(
+			"--book-line-height",
+			LINE_HEIGHT_VALUES[prefs.lineHeight],
+		);
+	}, []);
 
 	const handlePageChange = async (newIndex: number) => {
 		if (!response.success) return;
@@ -214,7 +286,29 @@ export default function BookView({ response }: { response: BookInfo }) {
 			ref={bookContainerRef}
 			className="container px-0 mx-auto sm:px-4 py-10 w-full h-full bg-none sm:bg-paper text-mainTxt sm:border border-accent/30 rounded-2xl space-y-5 font-lora overflow-y-auto">
 			<div className="text-center pb-6 border-b border-accent/20">
-				<h1 className="text-3xl sm:text-4xl font-semibold italic">{title}</h1>
+				<div className="flex items-center">
+					<button
+						className="p-1 rounded-lg cursor-pointer hover:bg-accent/5 transition-colors duration-300 shrink-0"
+						onClick={() => router.push("/dashboard/czytam")}>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							className="feather feather-arrow-left stroke-accent">
+							<line x1="19" y1="12" x2="5" y2="12"></line>
+							<polyline points="12 19 5 12 12 5"></polyline>
+						</svg>
+					</button>
+					<h1 className="text-3xl sm:text-4xl font-semibold italic grow text-center">
+						{title}
+					</h1>
+				</div>
 				<div className="mx-auto mt-4 h-px w-12 bg-accent" />
 				<p className="mt-4 text-xs sm:text-sm uppercase tracking-[0.25em] text-mainTxt/60">
 					{author}
@@ -275,8 +369,31 @@ export default function BookView({ response }: { response: BookInfo }) {
 							<polyline points="9 18 15 12 9 6"></polyline>
 						</svg>
 					</button>
+					<div className="ml-2 w-px h-6 bg-accent/20 shrink-0 hidden sm:block" />
+					{pageIndex === chapters.length - 1 && (
+						<div className="relative group flex items-center justify-center">
+							<button className="py-1 px-2 rounded-lg hover:bg-accent/5 transition-colors duration-300 cursor-pointer">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="24"
+									height="24"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									className="feather feather-check-circle text-accent w-4.5">
+									<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+									<polyline points="22 4 12 14.01 9 11.01"></polyline>
+								</svg>
+							</button>
+							<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+								Oznacz jako przeczytane
+							</span>
+						</div>
+					)}
 				</div>
-				<div className="w-px h-6 bg-accent/20 shrink-0 hidden sm:block" />
 
 				<div className="flex items-center gap-2 sm:ml-auto">
 					<ReaderOptionMenu
@@ -285,6 +402,15 @@ export default function BookView({ response }: { response: BookInfo }) {
 						selected={selectedFont}
 						onSelect={(value) => {
 							setSelectedFont(value);
+							document.documentElement.style.setProperty(
+								"--book-font-family",
+								FONT_FAMILY_VALUES[value],
+							);
+							saveReaderPrefs({
+								font: value,
+								fontSize: selectedFontSize,
+								lineHeight: selectedLineHeight,
+							});
 							setOpenMenu(null);
 						}}
 						isOpen={openMenu === "font"}
@@ -313,6 +439,15 @@ export default function BookView({ response }: { response: BookInfo }) {
 						selected={selectedFontSize}
 						onSelect={(value) => {
 							setSelectedFontSize(value);
+							document.documentElement.style.setProperty(
+								"--book-font-size",
+								FONT_SIZE_VALUES[value],
+							);
+							saveReaderPrefs({
+								font: selectedFont,
+								fontSize: value,
+								lineHeight: selectedLineHeight,
+							});
 							setOpenMenu(null);
 						}}
 						isOpen={openMenu === "fontSize"}
@@ -326,6 +461,15 @@ export default function BookView({ response }: { response: BookInfo }) {
 						selected={selectedLineHeight}
 						onSelect={(value) => {
 							setSelectedLineHeight(value);
+							document.documentElement.style.setProperty(
+								"--book-line-height",
+								LINE_HEIGHT_VALUES[value],
+							);
+							saveReaderPrefs({
+								font: selectedFont,
+								fontSize: selectedFontSize,
+								lineHeight: value,
+							});
 							setOpenMenu(null);
 						}}
 						isOpen={openMenu === "lineHeight"}

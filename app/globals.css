@@ -20,6 +20,8 @@ body {
 	--premium-to: #f97316;
 
 	--book-font-size: 1.2rem;
+	--book-line-height: 1.85;
+	--book-font-family: var(--font-lora), serif;
 
 	scroll-padding-top: 100px;
 }
@@ -27,6 +29,7 @@ body {
 @theme {
 	--font-montserrat: var(--font-montserrat);
 	--font-lora: var(--font-lora);
+	--font-merriweather: var(--font-merriweather);
 	--font-playfairDisplay: var(--font-playfairDisplay);
 	--color-accent: var(--accent);
 	--color-accentSecondary: var(--accent-secondary);
@@ -101,8 +104,9 @@ body {
 }
 
 .book-content {
-	line-height: 1.85;
+	line-height: var(--book-line-height);
 	font-size: var(--book-font-size);
+	font-family: var(--book-font-family);
 	color: var(--text-color);
 }
 .book-content p {
@@ -154,6 +158,7 @@ body {
 .book-content span {
 	color: var(--text-color) !important;
 }
-.book-content img {
+.book-content img,
+.book-content svg {
 	display: none;
 }

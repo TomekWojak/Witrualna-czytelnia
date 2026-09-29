@@ -1,5 +1,8 @@
-import { verifySession } from "@/lib/dal";
+import { getBooks } from "@/lib/getBooks";
+import MyBooks from "@/components/MyBooks";
+
 export default async function Favorites() {
-	await verifySession()
-	return "Ulubione";
+	const bookData = await getBooks({ favoritesOnly: true });
+
+	return <MyBooks bookData={bookData} emptyStateVariant="favorites" />;
 }

@@ -6,7 +6,13 @@ import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function MyBooks({ bookData }: { bookData: BookData }) {
+export default function MyBooks({
+	bookData,
+	emptyStateVariant = "reading",
+}: {
+	bookData: BookData;
+	emptyStateVariant?: "reading" | "favorites";
+}) {
 	const uploadInfoContext = useContext(UploadInfoContext);
 	const [books, setBooks] = useState(bookData.success ? bookData.books : []);
 	const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -17,6 +23,58 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 			return;
 		}
 	}, [bookData, uploadInfoContext]);
+
+	const handleAddToFavorites = async (id: string) => {
+		setOpenMenuId(null);
+
+		const { error } = await supabaseClient
+			.from("books")
+			.update({ is_favorite: true })
+			.eq("id", id);
+
+		if (error) {
+			console.error(error);
+			return;
+		}
+
+		setBooks((prev) =>
+			prev.map((book) =>
+				book.id === id ? { ...book, is_favorite: true } : book,
+			),
+		);
+
+		uploadInfoContext.setUploadingFileInfo({
+			success: true,
+			message: "Pomyślnie dodano do ulubionych",
+			id,
+		});
+	};
+
+	const handleRemoveFromFavorites = async (id: string) => {
+		setOpenMenuId(null);
+
+		const { error } = await supabaseClient
+			.from("books")
+			.update({ is_favorite: false })
+			.eq("id", id);
+
+		if (error) {
+			console.error(error);
+			return;
+		}
+
+		setBooks((prev) =>
+			prev.map((book) =>
+				book.id === id ? { ...book, is_favorite: false } : book,
+			),
+		);
+
+		uploadInfoContext.setUploadingFileInfo({
+			success: true,
+			message: "Pomyślnie usunięto z ulubionych",
+			id,
+		});
+	};
 
 	const handleRemoveFromReading = async (id: string) => {
 		setOpenMenuId(null);
@@ -34,8 +92,58 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 	if (!bookData.success) return;
 
 	if (books.length === 0) {
+		if (emptyStateVariant === "favorites") {
+			return (
+				<div className="flex flex-col items-center text-center gap-3 py-20 px-4 w-full text-mainTxt rounded-2xl font-lora">
+					<div className="flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="28"
+							height="28"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round">
+							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+						</svg>
+					</div>
+					<h2 className="text-xl font-semibold">
+						Nie masz jeszcze ulubionych książek
+					</h2>
+					<p className="max-w-sm text-sm text-mainTxt/60">
+						Oznacz książkę jako ulubioną z poziomu menu opcji, żeby szybko do
+						niej wracać.
+					</p>
+					<div className="flex items-center gap-4 w-full max-w-sm pt-4">
+						<span className="h-px flex-1 bg-accent/20" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							className="text-accent/60 shrink-0">
+							<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+							<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+						</svg>
+						<span className="h-px flex-1 bg-accent/20" />
+					</div>
+					<blockquote className="italic text-mainTxt/70">
+						„Zawsze wyobrażałem sobie Raj jako rodzaj biblioteki.”
+					</blockquote>
+					<span className="text-sm text-mainTxt/50">- Jorge Luis Borges</span>
+				</div>
+			);
+		}
+
 		return (
-			<div className="flex flex-col items-center text-center gap-3 py-20 px-4 w-full bg-paper text-mainTxt border border-accent/30 rounded-2xl">
+			<div className="flex flex-col items-center text-center gap-3 py-20 px-4 w-full text-mainTxt rounded-2xl">
 				<div className="flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -71,6 +179,7 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 					cover_url,
 					current_chapter_index,
 					chapter_count,
+					is_favorite,
 				}) => {
 					const progress =
 						chapter_count > 0
@@ -162,8 +271,8 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
 										<svg
 											xmlns="http://www.w3.org/2000/svg"
-											width="16"
-											height="16"
+											width="14"
+											height="14"
 											viewBox="0 0 24 24"
 											fill="none"
 											stroke="currentColor"
@@ -171,10 +280,36 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 											strokeLinecap="round"
 											strokeLinejoin="round"
 											className="shrink-0">
+											<polyline points="20 6 9 17 4 12"></polyline>
+										</svg>
+										Przeczytane
+									</button>
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											if (is_favorite) {
+												handleRemoveFromFavorites(id);
+											} else {
+												handleAddToFavorites(id);
+											}
+										}}
+										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											fill={is_favorite ? "currentColor" : "none"}
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="shrink-0">
 											<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
 										</svg>
-										Dodaj do ulubionych
+										{is_favorite ? "Usuń z ulubionych" : "Dodaj do ulubionych"}
 									</button>
+
 									<button
 										onClick={(e) => {
 											e.stopPropagation();
