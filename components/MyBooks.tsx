@@ -1,12 +1,15 @@
 "use client";
 import type { BookData } from "@/lib/types";
 import { UploadInfoContext } from "@/lib/UploadInfoContext";
-import { useContext, useEffect } from "react";
+import { supabaseClient } from "@/lib/supabase";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function MyBooks({ bookData }: { bookData: BookData }) {
 	const uploadInfoContext = useContext(UploadInfoContext);
+	const [books, setBooks] = useState(bookData.success ? bookData.books : []);
+	const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!bookData.success) {
@@ -15,9 +18,22 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 		}
 	}, [bookData, uploadInfoContext]);
 
+	const handleRemoveFromReading = async (id: string) => {
+		setOpenMenuId(null);
+
+		const { error } = await supabaseClient.from("books").delete().eq("id", id);
+
+		if (error) {
+			console.error(error);
+			return;
+		}
+
+		setBooks((prev) => prev.filter((book) => book.id !== id));
+	};
+
 	if (!bookData.success) return;
 
-	if (bookData.books.length === 0) {
+	if (books.length === 0) {
 		return (
 			<div className="flex flex-col items-center text-center gap-3 py-20 px-4 w-full bg-paper text-mainTxt border border-accent/30 rounded-2xl">
 				<div className="flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent">
@@ -47,7 +63,7 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 
 	return (
 		<ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-			{bookData.books.map(
+			{books.map(
 				({
 					title,
 					id,
@@ -58,25 +74,23 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 				}) => {
 					const progress =
 						chapter_count > 0
-							? Math.round(
-									((current_chapter_index + 1) / chapter_count) * 100,
-								)
+							? Math.round(((current_chapter_index + 1) / chapter_count) * 100)
 							: 0;
 
 					return (
-						<li key={id}>
+						<li key={id} className="relative">
 							<Link
 								aria-label={`Link do książki ${title}`}
 								href={`/dashboard/czytam/${id}`}
 								className="group flex flex-col gap-2">
-								<div className="relative aspect-2/3 w-full overflow-hidden rounded-lg border border-accent/20 bg-accent/10 shadow-sm transition-[transform,box-shadow] duration-300 group-hover:-translate-y-1 group-hover:shadow-lg">
+								<div className="relative aspect-2/3 w-full overflow-hidden rounded-lg border-2 border-accent/20 bg-accent/10 shadow-sm group-hover:border-accent">
 									{cover_url ? (
 										<Image
 											src={cover_url}
 											fill
 											sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
 											alt={`Okładka książki ${title}`}
-											className="object-cover"
+											className="object-cover group-hover:scale-105 transition-transform duration-300"
 										/>
 									) : (
 										<div className="flex h-full w-full items-center justify-center text-accent/40">
@@ -114,6 +128,80 @@ export default function MyBooks({ bookData }: { bookData: BookData }) {
 									</div>
 								</div>
 							</Link>
+
+							<button
+								aria-label="Więcej opcji"
+								onClick={(e) => {
+									e.stopPropagation();
+									setOpenMenuId((prev) => (prev === id ? null : id));
+								}}
+								className="absolute top-2 right-2 z-10 flex items-center justify-center w-7 h-7 rounded-full bg-panel/80 backdrop-blur-sm text-mainTxt cursor-pointer transition-colors hover:bg-panel">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round">
+									<circle cx="12" cy="12" r="1"></circle>
+									<circle cx="12" cy="5" r="1"></circle>
+									<circle cx="12" cy="19" r="1"></circle>
+								</svg>
+							</button>
+
+							{openMenuId === id && (
+								<div className="absolute top-10 right-2 z-20 w-50 p-2 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden">
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											setOpenMenuId(null);
+										}}
+										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="shrink-0">
+											<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+										</svg>
+										Dodaj do ulubionych
+									</button>
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+											handleRemoveFromReading(id);
+										}}
+										className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left text-red-500 cursor-pointer transition-colors hover:bg-red-500/10 rounded-lg">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="16"
+											height="16"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											className="shrink-0">
+											<polyline points="3 6 5 6 21 6"></polyline>
+											<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+											<path d="M10 11v6"></path>
+											<path d="M14 11v6"></path>
+											<path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"></path>
+										</svg>
+										Usuń z czytanych
+									</button>
+								</div>
+							)}
 						</li>
 					);
 				},

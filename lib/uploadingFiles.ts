@@ -117,11 +117,13 @@ const readEpub = async (
 
 	const chapterParts = getChapterPaths(spine, manifestItems);
 
-	const chaptersContent = await getChapterContent(
+	const rawChaptersContent = await getChapterContent(
 		results,
 		opfPath,
 		chapterParts,
 	);
+
+	const chaptersContent = rawChaptersContent?.filter(isMeaningfulChapter);
 
 	if (!chaptersContent || chaptersContent.length === 0) {
 		return { success: false, error: "Błąd podczas wczytywania ebooka" };
@@ -249,6 +251,14 @@ const getCoverHref = (
 	const coverId = coverMeta?.getAttribute("content");
 
 	return coverId ? manifestItems.get(coverId) : undefined;
+};
+
+const MIN_CHAPTER_TEXT_LENGTH = 100;
+
+const isMeaningfulChapter = (html: string): boolean => {
+	const text = html.replace(/<[^>]*>/g, "").trim();
+
+	return text.length >= MIN_CHAPTER_TEXT_LENGTH;
 };
 
 const getSpine = (data: string) => {

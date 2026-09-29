@@ -155,9 +155,5 @@ body {
 	color: var(--text-color) !important;
 }
 .book-content img {
-	max-width: 100%;
-	height: auto;
-	border-radius: 0.5rem;
-	margin: 1.5em auto;
-	display: block;
+	display: none;
 }
