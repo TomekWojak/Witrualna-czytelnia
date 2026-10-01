@@ -1,11 +1,9 @@
 import type { frameProps } from "@/lib/types";
-import { handleImportedFile } from "@/lib/uploadingFiles";
 
 import { usePathname } from "next/navigation";
 import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
 import { useContext } from "react";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
-import { useRouter } from "next/navigation";
 
 export default function DashboardContent({
 	asideOpen,

@@ -65,6 +65,28 @@ const isReaderPrefs = (value: unknown): value is ReaderPrefs => {
 	);
 };
 
+const markAsRead = async (id: string) => {
+	const { error } = await supabaseClient
+		.from("books")
+		.update({ has_been_read: true })
+		.eq("id", id);
+
+	if (error) {
+		console.error(error);
+		return;
+	}
+};
+const removeFromRead = async (id: string) => {
+	const { error } = await supabaseClient
+		.from("books")
+		.update({ has_been_read: false })
+		.eq("id", id);
+	if (error) {
+		console.error(error);
+		return;
+	}
+};
+
 const saveReaderPrefs = (prefs: ReaderPrefs) => {
 	localStorage.setItem("readerPrefs", JSON.stringify(prefs));
 };
@@ -163,6 +185,14 @@ export default function BookView({ response }: { response: BookInfo }) {
 	);
 	const [selectedLineHeight, setSelectedLineHeight] = useState(
 		LINE_HEIGHT_OPTIONS[1],
+	);
+	const [isRead, setIsRead] = useState(
+		response.success ? response.has_been_read : false,
+	);
+	const [readLabel, setReadLabel] = useState(
+		response.success && response.has_been_read
+			? "Usuń z przeczytanych"
+			: "Oznacz jako przeczytane",
 	);
 	const [selectedSound, setSelectedSound] = useState(SOUND_OPTIONS[0]);
 	const router = useRouter();
@@ -339,7 +369,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 					}}></div>
 			</div>
 
-			<div className="absolute bottom-0 sm:bottom-2 left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-220 mx-auto flex flex-col sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg">
+			<div className="absolute bottom-0 sm:bottom-2 left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-220 mx-auto flex flex-col sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg z-100">
 				<div className="pages flex gap-3 items-center">
 					<button
 						disabled={pageIndex === 0}
@@ -391,7 +421,21 @@ export default function BookView({ response }: { response: BookInfo }) {
 					<div className="ml-2 w-px h-6 bg-accent/20 shrink-0 hidden sm:block" />
 					{pageIndex === chapters.length - 1 && (
 						<div className="relative group flex items-center justify-center">
-							<button className="py-1 px-2 rounded-lg hover:bg-accent/5 transition-colors duration-300 cursor-pointer">
+							<button
+								onClick={(e) => {
+									e.stopPropagation();
+
+									if (isRead) {
+										removeFromRead(response.book_id);
+										setIsRead(false);
+										setReadLabel("Oznacz jako przeczytane");
+									} else {
+										markAsRead(response.book_id);
+										setIsRead(true);
+										setReadLabel("Usuń z przeczytanych");
+									}
+								}}
+								className="py-1 px-2 rounded-lg hover:bg-accent/5 transition-colors duration-300 cursor-pointer">
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="24"
@@ -402,13 +446,13 @@ export default function BookView({ response }: { response: BookInfo }) {
 									strokeWidth="2"
 									strokeLinecap="round"
 									strokeLinejoin="round"
-									className="feather feather-check-circle text-accent w-4.5">
+									className={`w-4.5 ${isRead ? "stroke-accent" : "stroke-mainTxt"}`}>
 									<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
 									<polyline points="22 4 12 14.01 9 11.01"></polyline>
 								</svg>
 							</button>
 							<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
-								Oznacz jako przeczytane
+								{readLabel}
 							</span>
 						</div>
 					)}
@@ -549,6 +593,9 @@ export default function BookView({ response }: { response: BookInfo }) {
 					/>
 				</div>
 			</div>
+			<div
+				onClick={() => setOpenMenu(null)}
+				className={`overlay fixed inset-0 z-10 ${openMenu ? "block" : "hidden"}`}></div>
 			<audio loop ref={audioRef} src="/audios/cafe-sound.mp3"></audio>
 		</div>
 	);

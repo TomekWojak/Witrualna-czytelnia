@@ -42,6 +42,7 @@ export type BookInfo =
 			}[];
 			book_id: string;
 			current_chapter_index: number;
+			has_been_read: boolean;
 	  }
 	| { success: false; message: string };
 
@@ -56,6 +57,7 @@ export type BookData =
 				current_chapter_index: number;
 				chapter_count: number;
 				is_favorite: boolean;
+				has_been_read: boolean;
 			}[];
 	  }
 	| { success: false; message: string };

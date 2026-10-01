@@ -11,7 +11,7 @@ export default function MyBooks({
 	emptyStateVariant = "reading",
 }: {
 	bookData: BookData;
-	emptyStateVariant?: "reading" | "favorites";
+	emptyStateVariant?: "reading" | "favorites" | "read";
 }) {
 	const uploadInfoContext = useContext(UploadInfoContext);
 	const [books, setBooks] = useState(bookData.success ? bookData.books : []);
@@ -22,6 +22,42 @@ export default function MyBooks({
 			return;
 		}
 	}, [bookData, uploadInfoContext]);
+
+	const markAsRead = async (id: string) => {
+		const { error } = await supabaseClient
+			.from("books")
+			.update({ has_been_read: true })
+			.eq("id", id);
+
+		if (error) {
+			console.error(error);
+			return;
+		}
+
+		setBooks((prev) => prev.filter((book) => book.id !== id));
+
+		uploadInfoContext.setUploadingFileInfo({
+			success: true,
+			message: "Oznaczono jako przeczytane",
+			id,
+		});
+	};
+	const removeFromRead = async (id: string) => {
+		const { error } = await supabaseClient
+			.from("books")
+			.update({ has_been_read: false })
+			.eq("id", id);
+		if (error) {
+			console.error(error);
+			return;
+		}
+		setBooks((prev) => prev.filter((book) => book.id !== id));
+		uploadInfoContext.setUploadingFileInfo({
+			success: true,
+			message: "Pomyślnie usunięto z przeczytanych",
+			id,
+		});
+	};
 
 	const handleAddToFavorites = async (id: string) => {
 		const { error } = await supabaseClient
@@ -144,6 +180,58 @@ export default function MyBooks({
 			);
 		}
 
+		if (emptyStateVariant === "read") {
+			return (
+				<div className="flex flex-col items-center text-center gap-3 py-20 px-4 w-full text-mainTxt rounded-2xl font-lora">
+					<div className="flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="28"
+							height="28"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round">
+							<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+							<polyline points="22 4 12 14.01 9 11.01"></polyline>
+						</svg>
+					</div>
+					<h2 className="text-xl font-semibold">
+						Nie ukończyłeś jeszcze żadnej książki
+					</h2>
+					<p className="max-w-sm text-sm text-mainTxt/60">
+						Dokończ czytanie i oznacz książkę jako przeczytaną, żeby zobaczyć ją
+						tutaj.
+					</p>
+					<div className="flex items-center gap-4 w-full max-w-sm pt-4">
+						<span className="h-px flex-1 bg-accent/20" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							className="text-accent/60 shrink-0">
+							<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+							<path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+						</svg>
+						<span className="h-px flex-1 bg-accent/20" />
+					</div>
+					<blockquote className="italic text-mainTxt/70">
+						„Czytelnik przeżywa tysiąc żyć, zanim umrze… Ten, kto nigdy nie
+						czyta, przeżywa tylko jedno.”
+					</blockquote>
+					<span className="text-sm text-mainTxt/50">- George R.R. Martin</span>
+				</div>
+			);
+		}
+
 		return (
 			<div className="flex flex-col items-center text-center gap-3 py-20 px-4 w-full text-mainTxt rounded-2xl">
 				<div className="flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 text-accent">
@@ -182,6 +270,7 @@ export default function MyBooks({
 					current_chapter_index,
 					chapter_count,
 					is_favorite,
+					has_been_read,
 				}) => {
 					const progress =
 						chapter_count > 0
@@ -240,7 +329,17 @@ export default function MyBooks({
 								</div>
 							</Link>
 							<div className="controls mt-3 flex items-center justify-center gap-2">
-								<button className="flex items-center gap-2 px-3 py-2 text-sm text-left text-mainTxt cursor-pointer transition-colors hover:bg-accent/10 rounded-lg">
+								<button
+									onClick={(e) => {
+										e.stopPropagation();
+
+										if (has_been_read) {
+											removeFromRead(id);
+										} else {
+											markAsRead(id);
+										}
+									}}
+									className={`flex items-center gap-2 px-3 py-2 text-sm text-left cursor-pointer transition-colors hover:bg-accent/10 rounded-lg ${has_been_read ? "text-accent" : "text-mainTxt"}`}>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										width="24"

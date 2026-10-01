@@ -114,7 +114,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
 									onDragEnter={dragenter}
 									onDragOver={dragover}
 									onDrop={drop}
-									className={`dropbox ${isDropboxOpen ? "flex" : "hidden"} flex-col items-center w-[min(90%,480px)] p-10 rounded-2xl absolute left-1/2 top-1/2 -translate-1/2 bg-panel/95 backdrop-blur-sm text-center border-2 border-dashed shadow-lg transition-colors ${isDragging ? "border-accent bg-accent/5" : "border-accent/30"}`}>
+									className={`dropbox ${isDropboxOpen ? "flex" : "hidden"} flex-col items-center w-[min(90%,480px)] p-10 rounded-2xl absolute left-1/2 top-1/2 -translate-1/2 bg-panel/95 backdrop-blur-sm text-center border-2 border-dashed shadow-lg transition-colors ${isDragging ? "border-accent bg-accent/5" : "border-accent/30"} z-100`}>
 									<div
 										className={`flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 transition-colors ${isDragging ? "bg-accent/20" : ""}`}>
 										<svg
@@ -187,6 +187,9 @@ export default function Layout({ children }: LayoutProps<"/">) {
 										{uploadingFileInfo?.message}
 									</span>
 								</p>
+								<div
+									onClick={() => setisDropboxOpen((p) => !p)}
+									className={`dropbox-overlay ${isDropboxOpen ? "block" : "hidden"} fixed inset-0 bg-panel/50 z-10`}></div>
 							</main>
 						</div>
 					</div>
