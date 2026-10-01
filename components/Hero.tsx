@@ -19,7 +19,7 @@ export default function Header() {
 					{headerContent.headerDescription}
 				</p>
 				<Link
-					href="/dashboard"
+					href="/dashboard/home"
 					className="bg-accent py-3 px-4 rounded-md cursor-pointer hover:bg-[#064c93] transition-colors md:text-xl">
 					{headerContent.headerCta}
 				</Link>

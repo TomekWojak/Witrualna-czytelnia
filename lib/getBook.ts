@@ -15,6 +15,15 @@ export const getBook = async (
 		.eq("id", slug)
 		.single();
 
+	const { error: updateReadTimeError } = await supabaseClient
+		.from("books")
+		.update({ last_read: "now()" })
+		.eq("id", slug);
+
+	if (updateReadTimeError) {
+		console.error(updateReadTimeError);
+	}
+
 	if (error) {
 		return { success: false, message: "Błąd pobierania informacji o książce" };
 	}

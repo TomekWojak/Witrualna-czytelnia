@@ -45,12 +45,13 @@ const SOUND_VALUES: Record<string, string> = {
 };
 const SOUND_OPTIONS = Object.keys(SOUND_VALUES);
 
-type ReaderMenu = "font" | "fontSize" | "lineHeight" | "sound";
+type ReaderMenu = "font" | "fontSize" | "lineHeight" | "sound" | "width";
 
 type ReaderPrefs = {
 	font: string;
 	fontSize: string;
 	lineHeight: string;
+	contentWidth: number;
 };
 
 const isReaderPrefs = (value: unknown): value is ReaderPrefs => {
@@ -61,7 +62,8 @@ const isReaderPrefs = (value: unknown): value is ReaderPrefs => {
 	return (
 		typeof data.font === "string" &&
 		typeof data.fontSize === "string" &&
-		typeof data.lineHeight === "string"
+		typeof data.lineHeight === "string" &&
+		typeof data.contentWidth === "number"
 	);
 };
 
@@ -195,6 +197,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 			: "Oznacz jako przeczytane",
 	);
 	const [selectedSound, setSelectedSound] = useState(SOUND_OPTIONS[0]);
+	const [contentWidth, setContentWidth] = useState(100);
 	const router = useRouter();
 
 	useEffect(() => {
@@ -204,6 +207,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 		setSelectedFont(prefs.font);
 		setSelectedFontSize(prefs.fontSize);
 		setSelectedLineHeight(prefs.lineHeight);
+		setContentWidth(prefs.contentWidth);
 
 		document.documentElement.style.setProperty(
 			"--book-font-family",
@@ -259,7 +263,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 
 	if (!response.success) {
 		return (
-			<div className="flex flex-col items-center text-center p-4 py-2 w-full h-full bg-paper text-mainTxt border border-accent/30 rounded-2xl gap-2 font-lora overflow-y-auto scrollbar-accent">
+			<div className="flex flex-col items-center text-center p-4 py-2 w-full h-full text-mainTxt gap-2 font-lora overflow-y-auto scrollbar-accent">
 				<Image
 					className="block w-[min(100%,450px)]"
 					width={1659}
@@ -332,7 +336,9 @@ export default function BookView({ response }: { response: BookInfo }) {
 				aria-hidden
 				className="fixed -z-10 bottom-10 -right-24 w-96 h-96 rounded-full bg-accentSecondary/5 blur-3xl pointer-events-none"
 			/>
-			<div className="container px-0 mx-auto lg:px-4 py-20 w-full space-y-5">
+			<div
+				className="container px-0 mx-auto lg:px-4 py-20 space-y-5"
+				style={{ width: `${contentWidth}%` }}>
 				<div className="text-center pb-6 border-b border-accent/20">
 					<div className="flex items-center">
 						<button
@@ -473,6 +479,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 								font: value,
 								fontSize: selectedFontSize,
 								lineHeight: selectedLineHeight,
+								contentWidth,
 							});
 							setOpenMenu(null);
 						}}
@@ -510,6 +517,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 								font: selectedFont,
 								fontSize: value,
 								lineHeight: selectedLineHeight,
+								contentWidth,
 							});
 							setOpenMenu(null);
 						}}
@@ -532,6 +540,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 								font: selectedFont,
 								fontSize: selectedFontSize,
 								lineHeight: value,
+								contentWidth,
 							});
 							setOpenMenu(null);
 						}}
@@ -591,6 +600,60 @@ export default function BookView({ response }: { response: BookInfo }) {
 							</svg>
 						}
 					/>
+
+					<div className="relative">
+						<button
+							aria-label="Szerokość treści"
+							onClick={() => toggleMenu("width")}
+							className={`flex items-center justify-center w-9 h-9 rounded-full cursor-pointer transition-colors duration-300 shrink-0 ${openMenu === "width" ? "bg-accent text-panel" : "bg-accent/10 text-accent hover:bg-accent/20"}`}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round">
+								<polyline points="18 8 22 12 18 16"></polyline>
+								<polyline points="6 8 2 12 6 16"></polyline>
+								<line x1="2" y1="12" x2="22" y2="12"></line>
+							</svg>
+						</button>
+
+						{openMenu === "width" && (
+							<div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-56 p-3 rounded-xl bg-panel border border-accent/30 shadow-lg z-10">
+								<span className="block text-xs font-semibold uppercase tracking-wide text-accent/70">
+									Szerokość treści
+								</span>
+								<span className="mt-2 block h-px bg-accent/20 rounded-full" />
+								<div className="mt-3 flex items-center gap-3">
+									<input
+										type="range"
+										min={50}
+										max={100}
+										step={5}
+										value={contentWidth}
+										onChange={(e) => {
+											const value = Number(e.target.value);
+											setContentWidth(value);
+											saveReaderPrefs({
+												font: selectedFont,
+												fontSize: selectedFontSize,
+												lineHeight: selectedLineHeight,
+												contentWidth: value,
+											});
+										}}
+										className="w-full accent-accent cursor-pointer"
+									/>
+									<span className="text-xs font-medium tabular-nums text-mainTxt/70 w-9 text-right">
+										{contentWidth}%
+									</span>
+								</div>
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 			<div

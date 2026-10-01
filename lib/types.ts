@@ -1,3 +1,5 @@
+import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
+
 export type frameProps = {
 	asideOpen: boolean;
 	onAsideOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
@@ -46,6 +48,10 @@ export type BookInfo =
 	  }
 	| { success: false; message: string };
 
+export type BookCounts =
+	| { success: true; read: number; favorites: number }
+	| { success: false; message: string };
+
 export type BookData =
 	| {
 			success: true;
@@ -58,6 +64,7 @@ export type BookData =
 				chapter_count: number;
 				is_favorite: boolean;
 				has_been_read: boolean;
+				created_at: Timestamp;
 			}[];
 	  }
 	| { success: false; message: string };
