@@ -1,14 +1,13 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { navigationContent, loginBtns } from "@/lib/content";
+import { navigationContent } from "@/lib/content";
 import { useEffect, useState } from "react";
 
 export default function Navigation() {
 	const [idx, setIdx] = useState(0);
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [isNavMobileOpen, setIsNavMobileOpen] = useState(false);
-	const [isLoginPanelOpen, setIsLoginPanelOpen] = useState(false);
 
 	const changeActiveLink = (index: number) => {
 		document.documentElement.style.setProperty("--index", String(index));
@@ -87,17 +86,7 @@ export default function Navigation() {
 						);
 					})}
 				</ul>
-				<button
-					onClick={() => setIsLoginPanelOpen((p) => !p)}
-					className="hidden sm:block cursor-pointer p-2 rounded-full hover:bg-[#f1f1f1] transition-colors duration-300">
-					<Image
-						className="w-6"
-						src="/homePageAssets/user-regular-full.svg"
-						width={150}
-						height={150}
-						alt=""
-					/>
-				</button>
+
 				<div
 					className={`nav-mobile fixed inset-0 w-screen h-screen sm:hidden bg-white z-500 transition-transform duration-600 delay-200 ${isNavMobileOpen ? "translate-x-0" : "translate-x-[150%]"}`}>
 					<ul className="flex w-full h-full flex-col gap-10 items-center justify-center text-accent">
@@ -108,16 +97,6 @@ export default function Navigation() {
 								</a>
 							</li>
 						))}
-						<li className="flex flex-col gap-2 w-1/2">
-							{loginBtns.map((btn) => (
-								<Link
-									key={btn.href}
-									href={btn.href}
-									className="px-3 w-full text-center py-2 bg-accent text-white rounded-lg border border-transparent hover:text-accent hover:bg-transparent hover:border-accent transition-colors duration-300">
-									{btn.label}
-								</Link>
-							))}
-						</li>
 					</ul>
 					<button
 						onClick={handleMobileNav}
@@ -131,17 +110,7 @@ export default function Navigation() {
 						/>
 					</button>
 				</div>
-				<div
-					className={`${isLoginPanelOpen ? "flex" : "hidden"} min-w-60 flex-col items-center gap-3 login-panel p-3 absolute right-0 -bottom-1 translate-y-full bg-white rounded-lg shadow-sm border border-accent/30`}>
-					{loginBtns.map((btn) => (
-						<Link
-							key={btn.href}
-							href={btn.href}
-							className="px-3 w-full text-center py-2 bg-accent text-white rounded-lg border border-transparent hover:text-accent hover:bg-transparent hover:border-accent transition-colors duration-300">
-							{btn.label}
-						</Link>
-					))}
-				</div>
+
 				<button
 					onClick={handleMobileNav}
 					className="relative mobile-btn w-8 h-8 cursor-pointer sm:hidden">

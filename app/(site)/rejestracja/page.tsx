@@ -3,6 +3,7 @@ import { supabaseClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function SignUpPage() {
 	const [error, setError] = useState("");
@@ -128,6 +129,13 @@ export default function SignUpPage() {
 						<line x1="12" y1="16" x2="12.01" y2="16"></line>
 					</svg>
 					<span className="text-center block grow text-sm">{error}</span>
+				</p>
+
+				<p className="text-center text-accent/80">
+					Posiadasz u nas konto?{" "}
+					<Link className="font-medium hover:underline" href="/logowanie">
+						Zaloguj się
+					</Link>
 				</p>
 			</form>
 		</div>
