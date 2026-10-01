@@ -38,8 +38,7 @@ export default function LoginPage() {
 				setIsLoading(false);
 				return;
 			}
-			router.push("/dashboard");
-
+			router.push("/dashboard/home");
 		} catch (err) {
 			console.error(err);
 			setError("Wystąpił nieoczekiwany błąd.");

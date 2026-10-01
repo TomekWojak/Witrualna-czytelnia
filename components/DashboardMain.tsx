@@ -244,7 +244,7 @@ export default function DashboardMain({
 						</svg>
 						Twoje statystyki
 					</div>
-					<div className="grid grid-cols-2 font-playfairDisplay gap-5">
+					<div className="grid grid-cols-1 sm:grid-cols-2 font-playfairDisplay gap-5">
 						<div className="card bg-main p-4 rounded-xl flex items-start gap-4">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
