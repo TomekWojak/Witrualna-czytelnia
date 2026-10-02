@@ -100,6 +100,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
 						/>
 						<div className="flex flex-col w-full h-full">
 							<DashboardContent
+								desktopAsideOpen={isDesktopAsideOpen}
 								onDesktopAsideOpen={setIsDesktopAsideOpen}
 								asideOpen={isAsideOpen}
 								onAsideOpenAction={setIsAsideOpen}

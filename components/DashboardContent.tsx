@@ -8,6 +8,7 @@ import { HeaderTitleContext } from "@/lib/headerTitleContext";
 export default function DashboardContent({
 	asideOpen,
 	onAsideOpenAction,
+	desktopAsideOpen,
 	onDesktopAsideOpen,
 	inputRefs,
 	onDropboxOpen,
@@ -66,8 +67,16 @@ export default function DashboardContent({
 							<line x1="9" y1="3" x2="9" y2="21"></line>
 						</svg>
 					</button>
-					<span className="text-mainTxt flex items-center gap-2">
-						{titleContext.title ?? getActiveLink(pathname)?.label}
+					<span className="text-mainTxt flex items-center gap-2 min-w-0">
+						<span
+							className={`truncate max-w-50 sm:max-w-none ${
+								desktopAsideOpen
+									? "md:max-w-70 lg:max-w-none"
+									: "md:max-w-none lg:max-w-none"
+							}`}
+							title={titleContext.title ?? undefined}>
+							{titleContext.title ?? getActiveLink(pathname)?.label}
+						</span>
 						{titleContext.author && (
 							<>
 								<div className="ml-2 w-px h-6 bg-accent/30 shrink-0 hidden lg:block fill-accent mx-2" />
@@ -78,18 +87,6 @@ export default function DashboardContent({
 					</span>
 				</div>
 				<div className="header-right flex items-center gap-6">
-					<button className="relative pro-btn flex items-center gap-2 px-4 py-2.5 rounded-full bg-linear-to-r from-premiumFrom via-premiumVia to-premiumTo text-white text-sm font-semibold cursor-pointer before:content-[''] before:absolute before:bg-linear-to-r before:from-premiumFrom before:via-premiumVia before:to-premiumTo before:-inset-px before:rounded-full before:-z-1 before:blur-[10px] before:opacity-25 before:transition-opacity before:duration-300 hover:before:opacity-50">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 640 640"
-							width="18"
-							height="18"
-							fill="currentColor"
-							className="text-premiumGold">
-							<path d="M345 151.2C354.2 143.9 360 132.6 360 120C360 97.9 342.1 80 320 80C297.9 80 280 97.9 280 120C280 132.6 285.9 143.9 295 151.2L226.6 258.8C216.6 274.5 195.3 278.4 180.4 267.2L120.9 222.7C125.4 216.3 128 208.4 128 200C128 177.9 110.1 160 88 160C65.9 160 48 177.9 48 200C48 221.8 65.5 239.6 87.2 240L119.8 457.5C124.5 488.8 151.4 512 183.1 512L456.9 512C488.6 512 515.5 488.8 520.2 457.5L552.8 240C574.5 239.6 592 221.8 592 200C592 177.9 574.1 160 552 160C529.9 160 512 177.9 512 200C512 208.4 514.6 216.3 519.1 222.7L459.7 267.3C444.8 278.5 423.5 274.6 413.5 258.9L345 151.2z" />
-						</svg>
-						<span className="hidden sm:inline">Zdobądź PRO</span>
-					</button>
 					<button
 						onClick={() => onDropboxOpen((p) => !p)}
 						className="import-btn flex items-center gap-2 px-3 py-2.5 rounded-md bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium shadow-sm cursor-pointer transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95">

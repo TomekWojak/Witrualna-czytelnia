@@ -79,6 +79,8 @@ const readEpub = async (
 	}
 	const { title, author } = getMetadata(manifestData);
 
+	const safeName = sanitizeStorageKey(book.name);
+
 	const manifestItems = getManifest(manifestData);
 
 	const cover = getCoverHref(manifestData, manifestItems);
@@ -93,7 +95,7 @@ const readEpub = async (
 		} else {
 			const coverData = await coverFile.async("blob");
 			const coverExt = cover.split(".").pop();
-			const coverStoragePath = `${user.id}/${book.name}-cover.${coverExt}`;
+			const coverStoragePath = `${user.id}/${safeName}-cover.${coverExt}`;
 
 			const { error: coverUploadError } = await supabaseClient.storage
 				.from("covers")
@@ -131,7 +133,7 @@ const readEpub = async (
 		return { success: false, error: "Błąd podczas wczytywania ebooka" };
 	}
 
-	const bookPath = `${user.id}/${book.name}`;
+	const bookPath = `${user.id}/${safeName}`;
 
 	const { error: uploadError } = await supabaseClient.storage
 		.from("books")
@@ -333,6 +335,12 @@ const getChapterContent = async (
 
 	return data;
 };
+
+const sanitizeStorageKey = (value: string): string =>
+	value
+		.normalize("NFKD")
+		.replace(/[̀-ͯ]/g, "")
+		.replace(/[^\w!\-.*'() &$@=;:+,?]/g, "_");
 
 const hashFile = async (buffer: ArrayBuffer): Promise<string> => {
 	const fingerPrint = await crypto.subtle.digest("SHA-256", buffer);

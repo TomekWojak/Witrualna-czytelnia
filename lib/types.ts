@@ -3,6 +3,7 @@ import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 export type frameProps = {
 	asideOpen: boolean;
 	onAsideOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
+	desktopAsideOpen: boolean;
 	onDesktopAsideOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	inputRefs: React.RefObject<HTMLInputElement | null>;
 	onDropboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
