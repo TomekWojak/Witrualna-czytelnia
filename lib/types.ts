@@ -46,6 +46,7 @@ export type BookInfo =
 			book_id: string;
 			current_chapter_index: number;
 			has_been_read: boolean;
+			scroll_position: number;
 	  }
 	| { success: false; message: string };
 

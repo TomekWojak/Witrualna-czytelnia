@@ -179,6 +179,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 	);
 	const bookContainerRef = useRef<HTMLDivElement | null>(null);
 	const audioRef = useRef<HTMLAudioElement>(null);
+	const isFirstPageIndexRenderRef = useRef(true);
 
 	const [openMenu, setOpenMenu] = useState<ReaderMenu | null>(null);
 	const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0]);
@@ -228,7 +229,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 
 		await supabaseClient
 			.from("books")
-			.update({ current_chapter_index: newIndex })
+			.update({ current_chapter_index: newIndex, scroll_position: 0 })
 			.eq("id", response.book_id);
 	};
 
@@ -248,7 +249,15 @@ export default function BookView({ response }: { response: BookInfo }) {
 		titleContext.setAuthor(response.author);
 
 		if (bookContainerRef.current) {
-			bookContainerRef.current.style.scrollBehavior = "smooth";
+			const refs = bookContainerRef.current;
+
+			const currentScrollPosition =
+				response.scroll_position * (refs.scrollHeight - refs.clientHeight);
+
+			refs.scrollTo({
+				top: currentScrollPosition,
+				behavior: "smooth",
+			});
 		}
 
 		return () => {
@@ -258,8 +267,53 @@ export default function BookView({ response }: { response: BookInfo }) {
 	}, [titleContext, response, uploadInfoContext]);
 
 	useEffect(() => {
-		bookContainerRef.current?.scrollTo(0, 0);
+		if (isFirstPageIndexRenderRef.current) {
+			isFirstPageIndexRenderRef.current = false;
+			return;
+		}
+
+		if (bookContainerRef.current) {
+			bookContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+		}
 	}, [pageIndex]);
+
+	useEffect(() => {
+		const refs = bookContainerRef.current;
+		if (refs) {
+			let id: undefined | NodeJS.Timeout;
+
+			const saveScrollProgress = async () => {
+				if (refs.scrollHeight === refs.clientHeight) return;
+
+				const scrollPosition =
+					refs.scrollTop / (refs.scrollHeight - refs.clientHeight);
+
+				if (response.success) {
+					const { error } = await supabaseClient
+						.from("books")
+						.update({ scroll_position: scrollPosition })
+						.eq("id", response.book_id);
+
+					if (error) {
+						console.error("Błąd pobierania danych o postępie scrollowania");
+						return;
+					}
+				}
+			};
+
+			const handleScroll = () => {
+				clearTimeout(id);
+				id = setTimeout(saveScrollProgress, 10000);
+			};
+
+			refs.addEventListener("scroll", handleScroll);
+
+			return () => {
+				refs.removeEventListener("scroll", handleScroll);
+				clearTimeout(id);
+			};
+		}
+	}, []);
 
 	if (!response.success) {
 		return (
