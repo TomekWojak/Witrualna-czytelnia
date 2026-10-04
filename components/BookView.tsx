@@ -275,6 +275,26 @@ export default function BookView({ response }: { response: BookInfo }) {
 	const toggleMenu = (menu: ReaderMenu) =>
 		setOpenMenu((prev) => (prev === menu ? null : menu));
 
+	const leaveFocusMode = () => {
+		setShowFocusModeMessage(false);
+
+		viewPrefsContext.setViewPrefs((prev) => {
+			localStorage.setItem(
+				"viewPrefs",
+				JSON.stringify({
+					...prev,
+					isHeaderVisible: true,
+					isReaderPanelVisible: true,
+				}),
+			);
+			return {
+				...prev,
+				isHeaderVisible: true,
+				isReaderPanelVisible: true,
+			};
+		});
+	};
+
 	useEffect(() => {
 		if (!response.success) {
 			uploadInfoContext.setUploadingFileInfo({
@@ -418,7 +438,9 @@ export default function BookView({ response }: { response: BookInfo }) {
 	const { title, author, chapters } = response;
 
 	return (
-		<div className="relative w-full h-full overflow-hidden">
+		<div
+			onClick={leaveFocusMode}
+			className="relative w-full h-full overflow-hidden">
 			<div
 				ref={bookContainerRef}
 				className="w-full h-full text-mainTxt font-lora overflow-y-auto scrollbar-accent">
@@ -435,7 +457,10 @@ export default function BookView({ response }: { response: BookInfo }) {
 						<div className="flex items-center">
 							<button
 								className="p-1 rounded-lg cursor-pointer hover:bg-accent/5 transition-colors duration-300 shrink-0"
-								onClick={() => router.push("/dashboard/czytam")}>
+								onClick={(e) => {
+									e.stopPropagation();
+									router.push("/dashboard/czytam");
+								}}>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"
 									width="24"
@@ -768,7 +793,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 			</div>
 
 			<div
-				className={`absolute left-1/2 ${showFocusModeMessage ? "bottom-3" : "-bottom-100"} -translate-x-1/2 bg-panel/95 backdrop-blur-sm border border-accent/30 rounded-full p-3 text-center transition-[bottom] duration-300`}>
+				className={`absolute left-1/2 ${showFocusModeMessage ? "bottom-3" : "-bottom-100"} -translate-x-1/2 bg-panel/95 backdrop-blur-sm border border-accent/30 rounded-full p-3 text-center transition-[bottom] duration-300 w-[80%] max-w-max`}>
 				<p className="text-mainTxt font-playfairDisplay">
 					Włączono tryb skupienia - kliknij gdziekolwiek aby go wyłączyć
 				</p>

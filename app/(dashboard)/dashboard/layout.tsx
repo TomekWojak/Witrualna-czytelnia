@@ -41,23 +41,6 @@ export default function Layout({ children }: LayoutProps<"/">) {
 		setIsFileLoading(false);
 		setisDropboxOpen((p) => !p);
 	};
-	const leaveFocusMode = () => {
-		setViewPrefs((prev) => {
-			localStorage.setItem(
-				"viewPrefs",
-				JSON.stringify({
-					...prev,
-					isHeaderVisible: true,
-					isReaderPanelVisible: true,
-				}),
-			);
-			return {
-				...prev,
-				isHeaderVisible: true,
-				isReaderPanelVisible: true,
-			};
-		});
-	};
 
 	useEffect(() => {
 		if (!uploadingFileInfo) return;
@@ -139,9 +122,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
 									onDropboxOpen={setisDropboxOpen}
 									handleFileUpload={handleFileUpload}
 								/>
-								<main
-									onClick={leaveFocusMode}
-									className="relative flex-1 min-h-0 overflow-x-hidden px-4 py-5 sm:px-7 sm:pt-7 scrollbar-accent">
+								<main className="relative flex-1 min-h-0 overflow-x-hidden px-4 py-5 sm:px-7 sm:pt-7 scrollbar-accent">
 									{children}
 
 									<div
