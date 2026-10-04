@@ -78,7 +78,7 @@ export default function DashboardAside({ asideOpen }: { asideOpen: boolean }) {
 	return (
 		<>
 			<aside
-				className={`flex flex-col w-70 overscroll-contain col-start-1 col-end-2 ${viewContext.viewPrefs.isDesktopAsideOpen ? "md:w-70 overflow-visible" : "md:w-0 overflow-hidden"} h-dvh ${asideOpen ? "translate-x-0" : "-translate-x-full"} bg-linear-to-b from-panel to-main transition-[width,translate] duration-300 fixed inset-y-0 md:static md:translate-x-0 left-0 border-r border-accent/20 z-50 shrink-0`}>
+				className={`flex flex-col w-70 overscroll-contain col-start-1 col-end-2 ${viewContext.viewPrefs.isDesktopAsideOpen ? "md:w-70 overflow-visible" : "md:w-0 overflow-hidden"} h-dvh ${asideOpen ? "translate-x-0" : "-translate-x-full"} bg-linear-to-b from-panel to-main transition-[width,translate] duration-300 fixed inset-y-0 md:static md:translate-x-0 left-0 border-r border-accent/20 z-150 shrink-0`}>
 				<div className="aside-header overflow-hidden p-4 flex items-center h-17 border-b border-accent/20">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"

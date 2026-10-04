@@ -141,7 +141,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
 								/>
 								<main
 									onClick={leaveFocusMode}
-									className="relative flex-1 min-h-0 overflow-x-hidden overflow-hidden px-4 py-5 sm:px-7 sm:pt-7 scrollbar-accent">
+									className="relative flex-1 min-h-0 overflow-x-hidden px-4 py-5 sm:px-7 sm:pt-7 scrollbar-accent">
 									{children}
 
 									<div
