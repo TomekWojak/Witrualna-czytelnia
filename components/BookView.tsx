@@ -1,8 +1,14 @@
 "use client";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
 import { supabaseClient } from "@/lib/supabase";
-import { useContext, useEffect, useRef, useState } from "react";
-import type { BookInfo } from "@/lib/types";
+import {
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
+import type { BookInfo, Note } from "@/lib/types";
 import { UploadInfoContext } from "@/lib/UploadInfoContext";
 import { ViewPrefsContext } from "@/lib/ViewPrefsContext";
 import Image from "next/image";
@@ -47,6 +53,8 @@ const SOUND_VALUES: Record<string, string> = {
 const SOUND_OPTIONS = Object.keys(SOUND_VALUES);
 
 type ReaderMenu = "font" | "fontSize" | "lineHeight" | "sound" | "width";
+
+const NOTE_POPUP_WIDTH = 256;
 
 type ReaderPrefs = {
 	font: string;
@@ -126,13 +134,19 @@ function ReaderOptionMenu({
 	onToggle: () => void;
 }) {
 	return (
-		<div className="relative">
+		<div className="relative group">
 			<button
 				aria-label={label}
 				onClick={onToggle}
 				className={`flex items-center justify-center w-9 h-9 rounded-full cursor-pointer transition-colors duration-300 shrink-0 ${isOpen ? "bg-accent text-panel" : "bg-accent/10 text-accent hover:bg-accent/20"}`}>
 				{icon}
 			</button>
+
+			{!isOpen && (
+				<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+					{label}
+				</span>
+			)}
 
 			{isOpen && (
 				<ul className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-50 w-max p-2 rounded-xl bg-panel border border-accent/30 shadow-lg overflow-hidden z-10">
@@ -181,8 +195,20 @@ export default function BookView({ response }: { response: BookInfo }) {
 	);
 
 	const bookContainerRef = useRef<HTMLDivElement | null>(null);
+	const bookContentRef = useRef<HTMLDivElement | null>(null);
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const isFirstPageIndexRenderRef = useRef(true);
+
+	const [notesMode, setNotesMode] = useState(false);
+	const [notes, setNotes] = useState<Note[] | []>([]);
+	const [notePositions, setNotePositions] = useState<
+		Record<string, { left: number; top: number }>
+	>({});
+	const [openNote, setOpenNote] = useState<{
+		id: string;
+		openLeft: boolean;
+	} | null>(null);
+	const [noteDraft, setNoteDraft] = useState({ title: "", description: "" });
 
 	const [openMenu, setOpenMenu] = useState<ReaderMenu | null>(null);
 	const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0]);
@@ -294,6 +320,98 @@ export default function BookView({ response }: { response: BookInfo }) {
 			};
 		});
 	};
+
+	const handleNotes = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		const target = e.target as HTMLElement;
+		const paragraph = target.closest<HTMLElement>("[data-paragraph-index]");
+
+		if (!paragraph) return;
+
+		const paragraphIndex = Number(paragraph.dataset.paragraphIndex);
+		const id = crypto.randomUUID();
+		const openLeft =
+			paragraph.getBoundingClientRect().left + NOTE_POPUP_WIDTH >
+			window.innerWidth;
+
+		setNotes((prev) => [
+			...prev,
+			{ id, paragraphIndex, title: "", description: "" },
+		]);
+		setNoteDraft({ title: "", description: "" });
+		setOpenNote({ id, openLeft });
+	};
+
+	const saveNote = (id: string) => {
+		setNotes((prev) =>
+			prev.map((note) =>
+				note.id === id
+					? {
+							...note,
+							title: noteDraft.title.trim(),
+							description: noteDraft.description.trim(),
+						}
+					: note,
+			),
+		);
+		setOpenNote(null);
+	};
+
+	useLayoutEffect(() => {
+		const bookContent =
+			bookContentRef.current?.querySelector<HTMLElement>(".book-content");
+
+		if (!bookContent) return;
+
+		bookContent
+			.querySelectorAll<HTMLElement>(
+				"p, h1, h2, h3, h4, h5, h6, blockquote, li",
+			)
+			.forEach((element, index) => {
+				element.dataset.paragraphIndex = String(index);
+				element.classList.add("p-2");
+			});
+	}, [pageIndex]);
+
+	useLayoutEffect(() => {
+		const wrapper = bookContentRef.current;
+
+		if (!wrapper) return;
+
+		const recomputePositions = () => {
+			const wrapperRect = wrapper.getBoundingClientRect();
+			const positions: Record<string, { left: number; top: number }> = {};
+
+			notes.forEach((note) => {
+				const paragraph = wrapper.querySelector<HTMLElement>(
+					`[data-paragraph-index="${note.paragraphIndex}"]`,
+				);
+
+				if (!paragraph) return;
+
+				const paragraphRect = paragraph.getBoundingClientRect();
+
+				positions[note.id] = {
+					left: paragraphRect.left - wrapperRect.left,
+					top: paragraphRect.top - wrapperRect.top,
+				};
+			});
+
+			setNotePositions(positions);
+		};
+
+		recomputePositions();
+
+		window.addEventListener("resize", recomputePositions);
+
+		return () => window.removeEventListener("resize", recomputePositions);
+	}, [
+		notes,
+		pageIndex,
+		contentWidth,
+		selectedFont,
+		selectedFontSize,
+		selectedLineHeight,
+	]);
 
 	useEffect(() => {
 		if (!response.success) {
@@ -485,66 +603,177 @@ export default function BookView({ response }: { response: BookInfo }) {
 							{author}
 						</p>
 					</div>
-					<div
-						className="book-content px-4 mx-auto"
-						style={{ width: `${contentWidth}%` }}
-						dangerouslySetInnerHTML={{
-							__html: chapters[pageIndex]?.content,
-						}}></div>
+					<div className="relative" ref={bookContentRef}>
+						<div
+							onClick={(e) => {
+								if (!notesMode) return;
+
+								handleNotes(e);
+							}}
+
+							className={`book-content px-4 mx-auto ${notesMode ? "**:data-paragraph-index:cursor-pointer **:data-paragraph-index:rounded-md **:data-paragraph-index:transition-colors **:data-paragraph-index:hover:bg-accent/10" : ""}`}
+							style={{ width: `${contentWidth}%` }}
+							dangerouslySetInnerHTML={{
+								__html: chapters[pageIndex]?.content,
+							}}
+						/>
+						{notes.map((note) => {
+							const position = notePositions[note.id];
+
+							if (!position) return null;
+
+							return (
+								<div
+									key={note.id}
+									style={{
+										left: `${position.left}px`,
+										top: `${position.top}px`,
+									}}
+									className="absolute">
+									<button
+										onClick={(e) => {
+											e.stopPropagation();
+
+											if (openNote?.id === note.id) {
+												setOpenNote(null);
+												return;
+											}
+
+											const wrapperRect =
+												bookContentRef.current?.getBoundingClientRect();
+											const markerViewportX =
+												(wrapperRect?.left ?? 0) + position.left;
+											const openLeft =
+												markerViewportX + NOTE_POPUP_WIDTH > window.innerWidth;
+
+											setNoteDraft({
+												title: note.title,
+												description: note.description,
+											});
+											setOpenNote({ id: note.id, openLeft });
+										}}
+										aria-label="Tutaj jest notatka"
+										className="flex items-center justify-center w-7 h-7 rounded-full bg-accent text-panel shadow-sm cursor-pointer transition-colors duration-300 hover:brightness-110">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											width="14"
+											height="14"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											strokeLinecap="round"
+											strokeLinejoin="round">
+											<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+										</svg>
+									</button>
+
+									{openNote?.id === note.id && (
+										<form
+											onClick={(e) => e.stopPropagation()}
+											onSubmit={(e) => {
+												e.preventDefault();
+												saveNote(note.id);
+											}}
+											className={`absolute top-full mt-2 w-64 flex flex-col gap-2 bg-panel border border-accent/30 rounded-lg p-4 shadow-lg z-10 text-mainTxt ${openNote.openLeft ? "right-0" : "left-0"}`}>
+											<input
+												value={noteDraft.title}
+												onChange={(e) =>
+													setNoteDraft((prev) => ({
+														...prev,
+														title: e.target.value,
+													}))
+												}
+												placeholder="Tytuł notatki"
+												className="w-full border border-accent/30 rounded-md bg-transparent px-2 py-1.5 text-sm outline-0 focus:border-accent transition-colors"
+											/>
+											<textarea
+												value={noteDraft.description}
+												onChange={(e) =>
+													setNoteDraft((prev) => ({
+														...prev,
+														description: e.target.value,
+													}))
+												}
+												placeholder="Opis notatki"
+												rows={4}
+												className="w-full resize-none border border-accent/30 rounded-md bg-transparent px-2 py-1.5 text-sm outline-0 focus:border-accent transition-colors"
+											/>
+											<button
+												type="submit"
+												className="self-end px-4 py-1.5 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium cursor-pointer transition-[filter] duration-300 hover:brightness-110">
+												Zapisz
+											</button>
+										</form>
+									)}
+								</div>
+							);
+						})}
+					</div>
 				</div>
 			</div>
 
 			<div
 				onClick={(e) => e.stopPropagation()}
-				className={`fixed md:absolute ${viewPrefsContext.viewPrefs.isReaderPanelVisible ? "bottom-0 sm:bottom-2" : "-bottom-50"}  left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-130 mx-auto flex flex-col flex-wrap justify-center sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg z-100 transition-[bottom] duration-300`}>
+				className={`fixed md:absolute ${viewPrefsContext.viewPrefs.isReaderPanelVisible ? "bottom-0 sm:bottom-2" : "-bottom-50"}  left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-150 mx-auto flex flex-col flex-wrap justify-center sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg z-100 transition-[bottom] duration-300 font-lora`}>
 				<div className="pages flex gap-3 items-center">
-					<button
-						disabled={pageIndex === 0}
-						onClick={async () => {
-							const newIndex = Math.max(0, pageIndex - 1);
-							setPageIndex(newIndex);
-							await handlePageChange(newIndex);
-						}}
-						className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel shadow-sm transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round">
-							<polyline points="15 18 9 12 15 6"></polyline>
-						</svg>
-					</button>
+					<div className="relative group flex items-center justify-center">
+						<button
+							disabled={pageIndex === 0}
+							onClick={async () => {
+								const newIndex = Math.max(0, pageIndex - 1);
+								setPageIndex(newIndex);
+								await handlePageChange(newIndex);
+							}}
+							className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel shadow-sm transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round">
+								<polyline points="15 18 9 12 15 6"></polyline>
+							</svg>
+						</button>
+						<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+							Poprzedni rozdział
+						</span>
+					</div>
 
 					<span className="text-mainTxt text-sm font-medium tabular-nums text-center">
 						Strona {pageIndex + 1} / {chapters.length}
 					</span>
 
-					<button
-						disabled={pageIndex === chapters.length - 1}
-						onClick={async () => {
-							const newIndex = Math.min(chapters.length - 1, pageIndex + 1);
-							setPageIndex(newIndex);
-							await handlePageChange(newIndex);
-						}}
-						className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel shadow-sm transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="18"
-							height="18"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeLinejoin="round">
-							<polyline points="9 18 15 12 9 6"></polyline>
-						</svg>
-					</button>
+					<div className="relative group flex items-center justify-center">
+						<button
+							disabled={pageIndex === chapters.length - 1}
+							onClick={async () => {
+								const newIndex = Math.min(chapters.length - 1, pageIndex + 1);
+								setPageIndex(newIndex);
+								await handlePageChange(newIndex);
+							}}
+							className="flex items-center justify-center w-9 h-9 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel shadow-sm transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shrink-0">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round">
+								<polyline points="9 18 15 12 9 6"></polyline>
+							</svg>
+						</button>
+						<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+							Następny rozdział
+						</span>
+					</div>
 					<div className="ml-2 w-px h-6 bg-accent/20 shrink-0 hidden sm:block" />
 					{pageIndex === chapters.length - 1 && (
 						<div className="relative group flex items-center justify-center">
@@ -722,7 +951,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 						}
 					/>
 
-					<div className="relative">
+					<div className="relative group">
 						<button
 							aria-label="Szerokość treści"
 							onClick={() => toggleMenu("width")}
@@ -742,6 +971,12 @@ export default function BookView({ response }: { response: BookInfo }) {
 								<line x1="2" y1="12" x2="22" y2="12"></line>
 							</svg>
 						</button>
+
+						{openMenu !== "width" && (
+							<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+								Szerokość treści
+							</span>
+						)}
 
 						{openMenu === "width" && (
 							<div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-56 p-3 rounded-xl bg-panel border border-accent/30 shadow-lg z-10">
@@ -775,25 +1010,59 @@ export default function BookView({ response }: { response: BookInfo }) {
 							</div>
 						)}
 					</div>
-					<button
-						onClick={enterFocusMode}
-						aria-label="Włącz tryb skupienia"
-						className="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer transition-colors duration-300 shrink-0 bg-accent/10 text-accent hover:bg-accent/20">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							viewBox="0 0 640 640"
-							width={18}
-							height={18}
-							fill="currentColor"
-							className="">
-							<path d="M73.4 73.4C85.9 60.9 106.1 60.9 118.6 73.4L192 146.7L192 128C192 110.3 206.3 96 224 96C241.7 96 256 110.3 256 128L256 224C256 241.7 241.7 256 224 256L128 256C110.3 256 96 241.7 96 224C96 206.3 110.3 192 128 192L146.7 192L73.3 118.6C60.9 106.1 60.9 85.9 73.4 73.4zM264 320C264 289.1 289.1 264 320 264C350.9 264 376 289.1 376 320C376 350.9 350.9 376 320 376C289.1 376 264 350.9 264 320zM566.6 118.6L493.3 192L512 192C529.7 192 544 206.3 544 224C544 241.7 529.7 256 512 256L416 256C398.3 256 384 241.7 384 224L384 128C384 110.3 398.3 96 416 96C433.7 96 448 110.3 448 128L448 146.7L521.4 73.3C533.9 60.8 554.2 60.8 566.7 73.3C579.2 85.8 579.2 106.1 566.7 118.6zM521.3 566.6L448 493.3L448 512C448 529.7 433.7 544 416 544C398.3 544 384 529.7 384 512L384 416C384 398.3 398.3 384 416 384L512 384C529.7 384 544 398.3 544 416C544 433.7 529.7 448 512 448L493.3 448L566.7 521.4C579.2 533.9 579.2 554.2 566.7 566.7C554.2 579.2 533.9 579.2 521.4 566.7zM73.4 521.4L146.7 448L128 448C110.3 448 96 433.7 96 416C96 398.3 110.3 384 128 384L224 384C241.7 384 256 398.3 256 416L256 512C256 529.7 241.7 544 224 544C206.3 544 192 529.7 192 512L192 493.3L118.6 566.7C106.1 579.2 85.8 579.2 73.3 566.7C60.8 554.2 60.8 533.9 73.3 521.4z" />
-						</svg>
-					</button>
+					<div className="relative group flex items-center justify-center">
+						<button
+							onClick={enterFocusMode}
+							aria-label="Włącz tryb skupienia"
+							className="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer transition-colors duration-300 shrink-0 bg-accent/10 text-accent hover:bg-accent/20">
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								viewBox="0 0 640 640"
+								width={18}
+								height={18}
+								fill="currentColor"
+								className="">
+								<path d="M73.4 73.4C85.9 60.9 106.1 60.9 118.6 73.4L192 146.7L192 128C192 110.3 206.3 96 224 96C241.7 96 256 110.3 256 128L256 224C256 241.7 241.7 256 224 256L128 256C110.3 256 96 241.7 96 224C96 206.3 110.3 192 128 192L146.7 192L73.3 118.6C60.9 106.1 60.9 85.9 73.4 73.4zM264 320C264 289.1 289.1 264 320 264C350.9 264 376 289.1 376 320C376 350.9 350.9 376 320 376C289.1 376 264 350.9 264 320zM566.6 118.6L493.3 192L512 192C529.7 192 544 206.3 544 224C544 241.7 529.7 256 512 256L416 256C398.3 256 384 241.7 384 224L384 128C384 110.3 398.3 96 416 96C433.7 96 448 110.3 448 128L448 146.7L521.4 73.3C533.9 60.8 554.2 60.8 566.7 73.3C579.2 85.8 579.2 106.1 566.7 118.6zM521.3 566.6L448 493.3L448 512C448 529.7 433.7 544 416 544C398.3 544 384 529.7 384 512L384 416C384 398.3 398.3 384 416 384L512 384C529.7 384 544 398.3 544 416C544 433.7 529.7 448 512 448L493.3 448L566.7 521.4C579.2 533.9 579.2 554.2 566.7 566.7C554.2 579.2 533.9 579.2 521.4 566.7zM73.4 521.4L146.7 448L128 448C110.3 448 96 433.7 96 416C96 398.3 110.3 384 128 384L224 384C241.7 384 256 398.3 256 416L256 512C256 529.7 241.7 544 224 544C206.3 544 192 529.7 192 512L192 493.3L118.6 566.7C106.1 579.2 85.8 579.2 73.3 566.7C60.8 554.2 60.8 533.9 73.3 521.4z" />
+							</svg>
+						</button>
+						<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+							Włącz tryb skupienia
+						</span>
+					</div>
+					<div className="relative group flex items-center justify-center">
+						<button
+							onClick={(e) => {
+								e.stopPropagation();
+								setNotesMode((p) => !p);
+							}}
+							aria-label="Dodaj notatkę"
+							className={`flex items-center ${notesMode ? "bg-accent/30 transition-none" : "bg-accent/10 hover:bg-accent/20 transition-colors"} justify-center w-9 h-9 rounded-full cursor-pointer duration-300 shrink-0 text-accent`}>
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="18"
+								height="18"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="2"
+								strokeLinecap="round"
+								strokeLinejoin="round">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+								<polyline points="14 2 14 8 20 8"></polyline>
+								<line x1="16" y1="13" x2="8" y2="13"></line>
+								<line x1="16" y1="17" x2="8" y2="17"></line>
+								<polyline points="10 9 9 9 8 9"></polyline>
+							</svg>
+						</button>
+						<span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-panel border border-accent/30 px-2 py-1 text-xs text-mainTxt shadow-lg opacity-0 scale-95 transition-[opacity,transform] duration-200 group-hover:opacity-100 group-hover:scale-100">
+							Dodaj notatkę
+						</span>
+					</div>
 				</div>
 			</div>
 
 			<div
-				className={`absolute left-1/2 ${showFocusModeMessage ? "bottom-3" : "-bottom-100"} -translate-x-1/2 bg-panel/95 backdrop-blur-sm border border-accent/30 rounded-full p-3 text-center transition-[bottom] duration-300 w-[80%] max-w-max`}>
+				className={`absolute left-1/2 ${showFocusModeMessage ? "bottom-3" : "-bottom-100"} -translate-x-1/2 bg-panel/95 backdrop-blur-sm border border-accent/30 rounded-full p-3 flex items-center justify-center text-center transition-[bottom] duration-300 w-[80%] max-w-max`}>
 				<p className="text-mainTxt font-playfairDisplay">
 					Włączono tryb skupienia - kliknij gdziekolwiek aby go wyłączyć
 				</p>
