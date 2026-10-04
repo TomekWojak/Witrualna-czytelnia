@@ -4,6 +4,7 @@ import { supabaseClient } from "@/lib/supabase";
 import { useContext, useEffect, useRef, useState } from "react";
 import type { BookInfo } from "@/lib/types";
 import { UploadInfoContext } from "@/lib/UploadInfoContext";
+import { ViewPrefsContext } from "@/lib/ViewPrefsContext";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -174,9 +175,11 @@ function ReaderOptionMenu({
 export default function BookView({ response }: { response: BookInfo }) {
 	const titleContext = useContext(HeaderTitleContext);
 	const uploadInfoContext = useContext(UploadInfoContext);
+	const viewPrefsContext = useContext(ViewPrefsContext);
 	const [pageIndex, setPageIndex] = useState<number>(
 		response.success ? response.current_chapter_index : 0,
 	);
+
 	const bookContainerRef = useRef<HTMLDivElement | null>(null);
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const isFirstPageIndexRenderRef = useRef(true);
@@ -199,7 +202,24 @@ export default function BookView({ response }: { response: BookInfo }) {
 	);
 	const [selectedSound, setSelectedSound] = useState(SOUND_OPTIONS[0]);
 	const [contentWidth, setContentWidth] = useState(100);
+	const [showFocusModeMessage, setShowFocusModeMessage] = useState(false);
 	const router = useRouter();
+
+	const isFocusModeActive =
+		!viewPrefsContext.viewPrefs.isHeaderVisible &&
+		!viewPrefsContext.viewPrefs.isReaderPanelVisible;
+
+	useEffect(() => {
+		if (!isFocusModeActive) return;
+
+		setShowFocusModeMessage(true);
+
+		const timeout = setTimeout(() => {
+			setShowFocusModeMessage(false);
+		}, 4000);
+
+		return () => clearTimeout(timeout);
+	}, [isFocusModeActive]);
 
 	useEffect(() => {
 		const prefs = getReaderPrefs();
@@ -223,6 +243,25 @@ export default function BookView({ response }: { response: BookInfo }) {
 			LINE_HEIGHT_VALUES[prefs.lineHeight],
 		);
 	}, []);
+
+	const enterFocusMode = () => {
+		viewPrefsContext.setViewPrefs(() => {
+			localStorage.setItem(
+				"viewPrefs",
+				JSON.stringify({
+					isDesktopAsideOpen: false,
+					isHeaderVisible: false,
+					isReaderPanelVisible: false,
+				}),
+			);
+
+			return {
+				isDesktopAsideOpen: false,
+				isHeaderVisible: false,
+				isReaderPanelVisible: false,
+			};
+		});
+	};
 
 	const handlePageChange = async (newIndex: number) => {
 		if (!response.success) return;
@@ -390,9 +429,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 				aria-hidden
 				className="fixed -z-10 bottom-10 -right-24 w-96 h-96 rounded-full bg-accentSecondary/5 blur-3xl pointer-events-none"
 			/>
-			<div
-				className="container px-0 mx-auto lg:px-4 py-20 space-y-5"
-				style={{ width: `${contentWidth}%` }}>
+			<div className="container px-0 mx-auto lg:px-4 py-20 space-y-5">
 				<div className="text-center pb-6 border-b border-accent/20">
 					<div className="flex items-center">
 						<button
@@ -423,13 +460,16 @@ export default function BookView({ response }: { response: BookInfo }) {
 					</p>
 				</div>
 				<div
-					className="book-content px-4"
+					className="book-content px-4 mx-auto"
+					style={{ width: `${contentWidth}%` }}
 					dangerouslySetInnerHTML={{
 						__html: chapters[pageIndex]?.content,
 					}}></div>
 			</div>
 
-			<div className="absolute bottom-0 sm:bottom-2 left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-220 mx-auto flex flex-col sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg z-100">
+			<div
+				onClick={(e) => e.stopPropagation()}
+				className={`absolute ${viewPrefsContext.viewPrefs.isReaderPanelVisible ? "bottom-0 sm:bottom-2" : "-bottom-50"}  left-1/2 -translate-x-1/2 w-full sm:w-[80%] max-w-220 mx-auto flex flex-col sm:flex-row items-center gap-4 px-4 py-2 sm:rounded-full bg-panel/95 backdrop-blur-sm border border-accent/30 shadow-lg z-100 transition-[bottom] duration-300`}>
 				<div className="pages flex gap-3 items-center">
 					<button
 						disabled={pageIndex === 0}
@@ -708,8 +748,30 @@ export default function BookView({ response }: { response: BookInfo }) {
 							</div>
 						)}
 					</div>
+					<button
+						onClick={enterFocusMode}
+						aria-label="Włącz tryb skupienia"
+						className="flex items-center justify-center w-9 h-9 rounded-full cursor-pointer transition-colors duration-300 shrink-0 bg-accent/10 text-accent hover:bg-accent/20">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							viewBox="0 0 640 640"
+							width={18}
+							height={18}
+							fill="currentColor"
+							className="">
+							<path d="M73.4 73.4C85.9 60.9 106.1 60.9 118.6 73.4L192 146.7L192 128C192 110.3 206.3 96 224 96C241.7 96 256 110.3 256 128L256 224C256 241.7 241.7 256 224 256L128 256C110.3 256 96 241.7 96 224C96 206.3 110.3 192 128 192L146.7 192L73.3 118.6C60.9 106.1 60.9 85.9 73.4 73.4zM264 320C264 289.1 289.1 264 320 264C350.9 264 376 289.1 376 320C376 350.9 350.9 376 320 376C289.1 376 264 350.9 264 320zM566.6 118.6L493.3 192L512 192C529.7 192 544 206.3 544 224C544 241.7 529.7 256 512 256L416 256C398.3 256 384 241.7 384 224L384 128C384 110.3 398.3 96 416 96C433.7 96 448 110.3 448 128L448 146.7L521.4 73.3C533.9 60.8 554.2 60.8 566.7 73.3C579.2 85.8 579.2 106.1 566.7 118.6zM521.3 566.6L448 493.3L448 512C448 529.7 433.7 544 416 544C398.3 544 384 529.7 384 512L384 416C384 398.3 398.3 384 416 384L512 384C529.7 384 544 398.3 544 416C544 433.7 529.7 448 512 448L493.3 448L566.7 521.4C579.2 533.9 579.2 554.2 566.7 566.7C554.2 579.2 533.9 579.2 521.4 566.7zM73.4 521.4L146.7 448L128 448C110.3 448 96 433.7 96 416C96 398.3 110.3 384 128 384L224 384C241.7 384 256 398.3 256 416L256 512C256 529.7 241.7 544 224 544C206.3 544 192 529.7 192 512L192 493.3L118.6 566.7C106.1 579.2 85.8 579.2 73.3 566.7C60.8 554.2 60.8 533.9 73.3 521.4z" />
+						</svg>
+					</button>
 				</div>
 			</div>
+
+			<div
+				className={`absolute left-1/2 ${showFocusModeMessage ? "bottom-3" : "-bottom-100"} -translate-x-1/2 bg-panel/95 backdrop-blur-sm border border-accent/30 rounded-full p-3 text-center transition-[bottom] duration-300`}>
+				<p className="text-mainTxt font-playfairDisplay">
+					Włączono tryb skupienia - kliknij gdziekolwiek aby go wyłączyć
+				</p>
+			</div>
+
 			<div
 				onClick={() => setOpenMenu(null)}
 				className={`overlay fixed inset-0 z-10 ${openMenu ? "block" : "hidden"}`}></div>

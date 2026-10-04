@@ -3,8 +3,18 @@ import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 export type frameProps = {
 	asideOpen: boolean;
 	onAsideOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
-	desktopAsideOpen: boolean;
-	onDesktopAsideOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	viewPrefs: {
+		isDesktopAsideOpen: boolean;
+		isHeaderVisible: boolean;
+		isReaderPanelVisible: boolean;
+	};
+	onViewPrefs: React.Dispatch<
+		React.SetStateAction<{
+			isDesktopAsideOpen: boolean;
+			isHeaderVisible: boolean;
+			isReaderPanelVisible: boolean;
+		}>
+	>;
 	inputRefs: React.RefObject<HTMLInputElement | null>;
 	onDropboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	handleFileUpload: (file: File | undefined) => Promise<void>;
@@ -29,6 +39,20 @@ export type ImportResult =
 export type UserContextProps = {
 	userData: UserData | null;
 	setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
+};
+export type ViewPrefsContextProps = {
+	setViewPrefs: React.Dispatch<
+		React.SetStateAction<{
+			isDesktopAsideOpen: boolean;
+			isHeaderVisible: boolean;
+			isReaderPanelVisible: boolean;
+		}>
+	>;
+	viewPrefs: {
+		isDesktopAsideOpen: boolean;
+		isHeaderVisible: boolean;
+		isReaderPanelVisible: boolean;
+	};
 };
 export type UploadInfoContextProps = {
 	setUploadingFileInfo: React.Dispatch<

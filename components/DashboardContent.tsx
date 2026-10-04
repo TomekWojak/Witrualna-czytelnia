@@ -4,31 +4,40 @@ import { usePathname } from "next/navigation";
 import { getActiveLink } from "@/lib/getActiveLinkFromPathname";
 import { useContext } from "react";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
+import { ViewPrefsContext } from "@/lib/ViewPrefsContext";
 
 export default function DashboardContent({
 	asideOpen,
 	onAsideOpenAction,
-	desktopAsideOpen,
-	onDesktopAsideOpen,
 	inputRefs,
 	onDropboxOpen,
 	handleFileUpload,
 }: frameProps) {
 	const pathname = usePathname();
 	const titleContext = useContext(HeaderTitleContext);
+	const viewContext = useContext(ViewPrefsContext);
 
 	const handleDesktopNav = () => {
-		onDesktopAsideOpen((prev) => {
-			localStorage.setItem("isDesktopAsideOpen", String(!prev));
+		viewContext.setViewPrefs((prev) => {
+			localStorage.setItem(
+				"viewPrefs",
+				JSON.stringify({
+					...prev,
+					isDesktopAsideOpen: !prev.isDesktopAsideOpen,
+				}),
+			);
 
-			return !prev;
+			return {
+				...prev,
+				isDesktopAsideOpen: !prev.isDesktopAsideOpen,
+			};
 		});
 	};
 
 	return (
 		<div className="relative dashboard-main w-full flex flex-col">
 			<header
-				className={`flex px-6 items-center justify-between sticky top-0 bg-linear-to-r from-panel to-main h-17 border-b border-accent/20 transition-[grid-column] duration-500 z-30`}>
+				className={`flex px-6 items-center justify-between sticky top-0 bg-linear-to-r from-panel to-main border-b border-accent/20 duration-300 z-30 transition-[height] ${viewContext.viewPrefs.isHeaderVisible ? "h-17" : "h-0 overflow-hidden"}`}>
 				<div className="header-left flex items-center gap-2">
 					<button
 						onClick={() => onAsideOpenAction((p) => !p)}
@@ -70,7 +79,7 @@ export default function DashboardContent({
 					<span className="text-mainTxt flex items-center gap-2 min-w-0">
 						<span
 							className={`truncate max-w-50 sm:max-w-none ${
-								desktopAsideOpen
+								viewContext.viewPrefs.isDesktopAsideOpen
 									? "md:max-w-70 lg:max-w-none"
 									: "md:max-w-none lg:max-w-none"
 							}`}
