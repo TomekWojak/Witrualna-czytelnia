@@ -61,8 +61,8 @@ export type UploadInfoContextProps = {
 };
 export type Note = {
 	id: string;
-	paragraphIndex: number;
-	chapterIndex: number;
+	paragraph_index: number;
+	chapter_index: number;
 	title: string;
 	description: string;
 };
@@ -78,6 +78,7 @@ export type BookInfo =
 			current_chapter_index: number;
 			has_been_read: boolean;
 			scroll_position: number;
+			notes: Note[];
 	  }
 	| { success: false; message: string };
 

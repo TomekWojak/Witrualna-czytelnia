@@ -46,6 +46,15 @@ export const getBook = async (
 		return { success: false, message: "Błąd pobierania rozdziałów" };
 	}
 
+	const { data: notes, error: notesError } = await supabaseClient
+		.from("notes")
+		.select("id,chapter_index,paragraph_index,title,description")
+		.eq("book_id", slug);
+
+	if (notesError) {
+		return { success: false, message: "Błąd pobierania notatek" };
+	}
+
 	return {
 		success: true,
 		title,
@@ -55,5 +64,6 @@ export const getBook = async (
 		has_been_read,
 		book_id: slug,
 		scroll_position,
+		notes,
 	};
 };
