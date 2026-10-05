@@ -335,8 +335,15 @@ export default function BookView({ response }: { response: BookInfo }) {
 
 		setNotes((prev) => [
 			...prev,
-			{ id, paragraphIndex, title: "", description: "" },
+			{
+				id,
+				paragraphIndex,
+				title: "",
+				description: "",
+				chapterIndex: pageIndex,
+			},
 		]);
+
 		setNoteDraft({ title: "", description: "" });
 		setOpenNote({ id, openLeft });
 	};
@@ -381,20 +388,22 @@ export default function BookView({ response }: { response: BookInfo }) {
 			const wrapperRect = wrapper.getBoundingClientRect();
 			const positions: Record<string, { left: number; top: number }> = {};
 
-			notes.forEach((note) => {
-				const paragraph = wrapper.querySelector<HTMLElement>(
-					`[data-paragraph-index="${note.paragraphIndex}"]`,
-				);
+			notes
+				.filter((note) => note.chapterIndex === pageIndex)
+				.forEach((note) => {
+					const paragraph = wrapper.querySelector<HTMLElement>(
+						`[data-paragraph-index="${note.paragraphIndex}"]`,
+					);
 
-				if (!paragraph) return;
+					if (!paragraph) return;
 
-				const paragraphRect = paragraph.getBoundingClientRect();
+					const paragraphRect = paragraph.getBoundingClientRect();
 
-				positions[note.id] = {
-					left: paragraphRect.left - wrapperRect.left,
-					top: paragraphRect.top - wrapperRect.top,
-				};
-			});
+					positions[note.id] = {
+						left: paragraphRect.left - wrapperRect.left,
+						top: paragraphRect.top - wrapperRect.top,
+					};
+				});
 
 			setNotePositions(positions);
 		};
@@ -617,98 +626,101 @@ export default function BookView({ response }: { response: BookInfo }) {
 								__html: chapters[pageIndex]?.content,
 							}}
 						/>
-						{notes.map((note) => {
-							const position = notePositions[note.id];
+						{notes
+							.filter((note) => note.chapterIndex === pageIndex)
+							.map((note) => {
+								const position = notePositions[note.id];
 
-							if (!position) return null;
+								if (!position) return null;
 
-							return (
-								<div
-									key={note.id}
-									style={{
-										left: `${position.left}px`,
-										top: `${position.top}px`,
-									}}
-									className="absolute">
-									<button
-										onClick={(e) => {
-											e.stopPropagation();
-
-											if (openNote?.id === note.id) {
-												setOpenNote(null);
-												return;
-											}
-
-											const wrapperRect =
-												bookContentRef.current?.getBoundingClientRect();
-											const markerViewportX =
-												(wrapperRect?.left ?? 0) + position.left;
-											const openLeft =
-												markerViewportX + NOTE_POPUP_WIDTH > window.innerWidth;
-
-											setNoteDraft({
-												title: note.title,
-												description: note.description,
-											});
-											setOpenNote({ id: note.id, openLeft });
+								return (
+									<div
+										key={note.id}
+										style={{
+											left: `${position.left}px`,
+											top: `${position.top}px`,
 										}}
-										aria-label="Tutaj jest notatka"
-										className="flex items-center justify-center w-7 h-7 rounded-full bg-accent text-panel shadow-sm cursor-pointer transition-colors duration-300 hover:brightness-110">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="14"
-											height="14"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="2"
-											strokeLinecap="round"
-											strokeLinejoin="round">
-											<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-										</svg>
-									</button>
+										className="absolute">
+										<button
+											onClick={(e) => {
+												e.stopPropagation();
 
-									{openNote?.id === note.id && (
-										<form
-											onClick={(e) => e.stopPropagation()}
-											onSubmit={(e) => {
-												e.preventDefault();
-												saveNote(note.id);
+												if (openNote?.id === note.id) {
+													setOpenNote(null);
+													return;
+												}
+
+												const wrapperRect =
+													bookContentRef.current?.getBoundingClientRect();
+												const markerViewportX =
+													(wrapperRect?.left ?? 0) + position.left;
+												const openLeft =
+													markerViewportX + NOTE_POPUP_WIDTH >
+													window.innerWidth;
+
+												setNoteDraft({
+													title: note.title,
+													description: note.description,
+												});
+												setOpenNote({ id: note.id, openLeft });
 											}}
-											className={`absolute top-full mt-2 w-64 flex flex-col gap-2 bg-panel border border-accent/30 rounded-lg p-4 shadow-lg z-10 text-mainTxt ${openNote.openLeft ? "right-0" : "left-0"}`}>
-											<input
-												value={noteDraft.title}
-												onChange={(e) =>
-													setNoteDraft((prev) => ({
-														...prev,
-														title: e.target.value,
-													}))
-												}
-												placeholder="Tytuł notatki"
-												className="w-full border border-accent/30 rounded-md bg-transparent px-2 py-1.5 text-sm outline-0 focus:border-accent transition-colors"
-											/>
-											<textarea
-												value={noteDraft.description}
-												onChange={(e) =>
-													setNoteDraft((prev) => ({
-														...prev,
-														description: e.target.value,
-													}))
-												}
-												placeholder="Opis notatki"
-												rows={4}
-												className="w-full resize-none border border-accent/30 rounded-md bg-transparent px-2 py-1.5 text-sm outline-0 focus:border-accent transition-colors"
-											/>
-											<button
-												type="submit"
-												className="self-end px-4 py-1.5 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium cursor-pointer transition-[filter] duration-300 hover:brightness-110">
-												Zapisz
-											</button>
-										</form>
-									)}
-								</div>
-							);
-						})}
+											aria-label="Tutaj jest notatka"
+											className="flex items-center justify-center w-7 h-7 rounded-full bg-accent text-panel shadow-sm cursor-pointer transition-colors duration-300 hover:brightness-110">
+											<svg
+												xmlns="http://www.w3.org/2000/svg"
+												width="14"
+												height="14"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round">
+												<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+											</svg>
+										</button>
+											
+										{openNote?.id === note.id && (
+											<form
+												onClick={(e) => e.stopPropagation()}
+												onSubmit={(e) => {
+													e.preventDefault();
+													saveNote(note.id);
+												}}
+												className={`absolute top-full mt-2 w-64 flex flex-col gap-2 bg-panel border border-accent/30 rounded-lg p-4 shadow-lg z-10 text-mainTxt ${openNote.openLeft ? "right-0" : "left-0"}`}>
+												<input
+													value={noteDraft.title}
+													onChange={(e) =>
+														setNoteDraft((prev) => ({
+															...prev,
+															title: e.target.value,
+														}))
+													}
+													placeholder="Tytuł notatki"
+													className="w-full border border-accent/30 rounded-md bg-transparent px-2 py-1.5 text-sm outline-0 focus:border-accent transition-colors"
+												/>
+												<textarea
+													value={noteDraft.description}
+													onChange={(e) =>
+														setNoteDraft((prev) => ({
+															...prev,
+															description: e.target.value,
+														}))
+													}
+													placeholder="Opis notatki"
+													rows={4}
+													className="w-full resize-none border border-accent/30 rounded-md bg-transparent px-2 py-1.5 text-sm outline-0 focus:border-accent transition-colors"
+												/>
+												<button
+													type="submit"
+													className="self-end px-4 py-1.5 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium cursor-pointer transition-[filter] duration-300 hover:brightness-110">
+													Zapisz
+												</button>
+											</form>
+										)}
+									</div>
+								);
+							})}
 					</div>
 				</div>
 			</div>
