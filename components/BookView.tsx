@@ -579,7 +579,8 @@ export default function BookView({ response }: { response: BookInfo }) {
 					aria-hidden
 					className="fixed -z-10 bottom-10 -right-24 w-96 h-96 rounded-full bg-accentSecondary/5 blur-3xl pointer-events-none"
 				/>
-				<div className="container px-0 mx-auto lg:px-4 py-20 space-y-5">
+				<div
+					className={`container px-0 mx-auto lg:px-4 ${isFocusModeActive ? "pt-0" : "py-20"} space-y-5`}>
 					<div
 						className={`text-center ${isFocusModeActive ? "pb-0 overflow-hidden h-0" : "pb-6 border-b border-accent/20"}`}>
 						<div className="flex items-center">
