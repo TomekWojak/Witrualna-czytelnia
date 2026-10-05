@@ -570,7 +570,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 			className="relative w-full h-full overflow-hidden">
 			<div
 				ref={bookContainerRef}
-				className="w-full h-full text-mainTxt font-lora overflow-y-auto scrollbar-accent">
+				className={`w-full h-full ${isFocusModeActive ? "scrollbar-none" : "scrollbar-accent"} text-mainTxt font-lora overflow-y-auto`}>
 				<div
 					aria-hidden
 					className="fixed -z-10 top-10 -left-24 w-80 h-80 rounded-full bg-accent/5 blur-3xl pointer-events-none"
@@ -580,7 +580,8 @@ export default function BookView({ response }: { response: BookInfo }) {
 					className="fixed -z-10 bottom-10 -right-24 w-96 h-96 rounded-full bg-accentSecondary/5 blur-3xl pointer-events-none"
 				/>
 				<div className="container px-0 mx-auto lg:px-4 py-20 space-y-5">
-					<div className="text-center pb-6 border-b border-accent/20">
+					<div
+						className={`text-center ${isFocusModeActive ? "pb-0 overflow-hidden h-0" : "pb-6 border-b border-accent/20"}`}>
 						<div className="flex items-center">
 							<button
 								className="p-1 rounded-lg cursor-pointer hover:bg-accent/5 transition-colors duration-300 shrink-0"
@@ -679,7 +680,7 @@ export default function BookView({ response }: { response: BookInfo }) {
 												<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
 											</svg>
 										</button>
-											
+
 										{openNote?.id === note.id && (
 											<form
 												onClick={(e) => e.stopPropagation()}
