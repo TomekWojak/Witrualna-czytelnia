@@ -189,13 +189,28 @@ function ReaderOptionMenu({
   );
 }
 
-export default function BookView({ response }: { response: BookInfo }) {
+export default function BookView({
+  response,
+  targetNodeId,
+}: {
+  response: BookInfo;
+  targetNodeId: string | undefined;
+}) {
   const titleContext = useContext(HeaderTitleContext);
   const uploadInfoContext = useContext(UploadInfoContext);
   const viewPrefsContext = useContext(ViewPrefsContext);
-  const [pageIndex, setPageIndex] = useState<number>(
-    response.success ? response.current_chapter_index : 0,
-  );
+  const targetNote =
+    response.success && targetNodeId
+      ? response.notes.find((note) => note.id === targetNodeId)
+      : undefined;
+
+  const [pageIndex, setPageIndex] = useState<number>(() => {
+    if (!response.success) return 0;
+
+    return targetNote
+      ? targetNote.chapter_index
+      : response.current_chapter_index;
+  });
 
   const bookContainerRef = useRef<HTMLDivElement | null>(null);
   const bookContentRef = useRef<HTMLDivElement | null>(null);
@@ -217,8 +232,11 @@ export default function BookView({ response }: { response: BookInfo }) {
   const [openNote, setOpenNote] = useState<{
     id: string;
     openLeft: boolean;
-  } | null>(null);
-  const [noteDraft, setNoteDraft] = useState({ title: "", description: "" });
+  } | null>(() => (targetNote ? { id: targetNote.id, openLeft: false } : null));
+  const [noteDraft, setNoteDraft] = useState(() => ({
+    title: targetNote?.title ?? "",
+    description: targetNote?.description ?? "",
+  }));
   const [chapterProgress, setChapterProgress] = useState(0);
 
   const [openMenu, setOpenMenu] = useState<ReaderMenu | null>(null);
@@ -499,7 +517,13 @@ export default function BookView({ response }: { response: BookInfo }) {
     titleContext.setTitle(response.title);
     titleContext.setAuthor(response.author);
 
-    if (bookContainerRef.current) {
+    if (targetNote) {
+      bookContentRef.current
+        ?.querySelector<HTMLElement>(
+          `[data-paragraph-index="${targetNote.paragraph_index}"]`,
+        )
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else if (bookContainerRef.current) {
       const refs = bookContainerRef.current;
 
       const currentScrollPosition =
@@ -515,7 +539,7 @@ export default function BookView({ response }: { response: BookInfo }) {
       titleContext.setTitle(undefined);
       titleContext.setAuthor(undefined);
     };
-  }, [titleContext, response, uploadInfoContext]);
+  }, [titleContext, response, uploadInfoContext, targetNote]);
 
   useEffect(() => {
     if (isFirstPageIndexRenderRef.current) {

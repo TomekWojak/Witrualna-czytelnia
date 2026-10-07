@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-
+import type { ImportResult } from "@/lib/types";
 export default function SignUpPage() {
 	const [error, setError] = useState("");
 	const [emailValue, setEmailValue] = useState("");
 	const [passwordValue, setPasswordValue] = useState("");
 	const [repeatPasswordValue, setRepeatPasswordValue] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+	const [registrationStatus, setRegistrationStatus] =
+		useState<ImportResult | null>(null);
 	const router = useRouter();
 
 	const handleForm = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -48,11 +50,22 @@ export default function SignUpPage() {
 					return;
 				}
 
+				setRegistrationStatus({
+					success: false,
+					message: "Nieudana próba rejestracji",
+				});
 				setError("Nieudana próba rejestracji");
 				return;
 			}
 
-			router.push("/logowanie");
+			setRegistrationStatus({
+				success: true,
+				message: "Zarejestrowano pomyślnie, teraz możesz się zalogować",
+			});
+			setTimeout(() => {
+				router.push("/logowanie");
+			}, 5000);
+
 			setError("");
 		} catch (err) {
 			console.log(err);
@@ -63,7 +76,7 @@ export default function SignUpPage() {
 	};
 
 	return (
-		<div className="min-h-screen flex items-center justify-center w-full bg-linear-to-br from-[#193f64] via-[#315f85] to-white">
+		<div className="min-h-screen relative flex items-center justify-center w-full bg-linear-to-br from-[#193f64] via-[#315f85] to-white">
 			<form
 				onSubmit={handleForm}
 				className="flex flex-col w-full max-w-125 rounded-2xl bg-white p-8 shadow-2xl gap-5 text-accent">
@@ -100,7 +113,7 @@ export default function SignUpPage() {
 				<button
 					disabled={isLoading}
 					className="disabled:opacity-80 disabled:pointer-events-none w-full flex justify-center gap-5 items-center px-5 py-2.5 bg-accent rounded-lg text-white cursor-pointer border border-transparent hover:text-accent hover:bg-transparent hover:border-accent transition-colors duration-300">
-					Zaloguj
+					Zarejestruj się
 					{isLoading && (
 						<Image
 							className="animate-spin"
@@ -138,6 +151,27 @@ export default function SignUpPage() {
 					</Link>
 				</p>
 			</form>
+			<p
+				className={`duration-300 fixed right-4 bottom-4 w-fit gap-3 ${registrationStatus ? "translate-y-0 transition-transform duration-300 before:animate-[loadingBar_5s_infinite]" : "translate-y-125"} ${registrationStatus?.success ? "bg-green-500/20 text-green-500 border-green-500/40 before:bg-green-500" : "bg-red-500/20 text-red-500 border-red-500/40 before:bg-red-500"} p-3 flex items-center border rounded-lg font-medium before:content-[''] before:h-px before:w-full before:absolute before:left-0 before:top-0 overflow-hidden z-999`}>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					strokeWidth="2"
+					strokeLinecap="round"
+					strokeLinejoin="round"
+					className="feather feather-alert-circle w-4.5 shrink-0">
+					<circle cx="12" cy="12" r="10"></circle>
+					<line x1="12" y1="8" x2="12" y2="12"></line>
+					<line x1="12" y1="16" x2="12.01" y2="16"></line>
+				</svg>
+				<span className="block grow text-center">
+					{registrationStatus?.message}
+				</span>
+			</p>
 		</div>
 	);
 }
