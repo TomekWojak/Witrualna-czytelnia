@@ -110,7 +110,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
 			<HeaderTitleContext value={headerTitleValue}>
 				<UploadInfoContext value={uploadInfoValue}>
 					<ViewPrefsContext value={viewPrefsValue}>
-						<div className="dashboard-content flex w-full h-full">
+						<div className="dashboard-content flex w-full h-full min-w-0">
 							<DashboardAside asideOpen={isAsideOpen} />
 							<div className="flex flex-col w-full h-full">
 								<DashboardContent

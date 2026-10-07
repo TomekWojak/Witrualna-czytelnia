@@ -173,7 +173,7 @@ export default function NotesView({
 					className="bg-panel/60 border border-accent/20 rounded-2xl p-5 sm:p-6">
 					<div className="flex flex-col sm:flex-row sm:items-center gap-3 pb-4 mb-5 border-b border-accent/20">
 						<div className="min-w-0">
-							<h2 className="font-playfairDisplay text-xl sm:text-2xl truncate">
+							<h2 className="font-playfairDisplay text-xl sm:text-2xl">
 								{group.title}
 							</h2>
 							{group.author && (
