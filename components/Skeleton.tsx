@@ -74,3 +74,56 @@ export function MyBooksSkeleton() {
 		</ul>
 	);
 }
+
+function ShimmerBlock({ className }: { className: string }) {
+	return (
+		<div className={`relative overflow-hidden bg-accent/20 ${className}`}>
+			<div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite_alternate] bg-linear-to-r from-transparent via-white/30 to-transparent" />
+		</div>
+	);
+}
+
+export function NotesSkeleton() {
+	return (
+		<div className="container mx-auto space-y-8 text-mainTxt font-lora">
+			<div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+				<div>
+					<h1 className="font-playfairDisplay text-3xl sm:text-4xl">
+						Twoje notatki
+					</h1>
+					<div className="mt-3 h-1 w-16 bg-accent rounded-full" />
+				</div>
+				<ShimmerBlock className="w-full sm:w-72 h-9 rounded-full" />
+			</div>
+
+			{Array.from({ length: 2 }).map((_, groupIndex) => (
+				<section
+					key={groupIndex}
+					className="bg-panel/60 border border-accent/20 rounded-2xl p-5 sm:p-6">
+					<div className="flex flex-col sm:flex-row sm:items-center gap-3 pb-4 mb-5 border-b border-accent/20">
+						<div className="flex flex-col gap-2 w-full max-w-xs">
+							<ShimmerBlock className="w-3/4 h-7 rounded-md" />
+							<ShimmerBlock className="w-1/2 h-4 rounded-md" />
+						</div>
+						<ShimmerBlock className="sm:ml-auto w-10 h-6 rounded-full shrink-0" />
+						<ShimmerBlock className="w-28 h-5 rounded-md shrink-0" />
+					</div>
+
+					<ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+						{Array.from({ length: 3 }).map((_, noteIndex) => (
+							<li
+								key={noteIndex}
+								className="flex flex-col gap-2 bg-main rounded-xl p-4 border border-accent/10">
+								<ShimmerBlock className="w-20 h-5 rounded-md" />
+								<ShimmerBlock className="w-2/3 h-6 rounded-md" />
+								<ShimmerBlock className="w-full h-3.5 rounded-md mt-1" />
+								<ShimmerBlock className="w-full h-3.5 rounded-md" />
+								<ShimmerBlock className="w-4/5 h-3.5 rounded-md" />
+							</li>
+						))}
+					</ul>
+				</section>
+			))}
+		</div>
+	);
+}
