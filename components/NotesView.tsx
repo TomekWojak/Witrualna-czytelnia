@@ -210,7 +210,7 @@ export default function NotesView({
 						{group.notes.map((note) => (
 							<li key={note.id} className="relative w-full h-full">
 								<Link
-									className="w-full h-full flex flex-col gap-2 bg-main rounded-xl p-4 border border-accent/10"
+									className="w-full h-full flex flex-col gap-2 bg-main rounded-xl p-4 border border-accent/10 hover:border-accent/40 transition-colors duration-200"
 									href={`/dashboard/czytam/${note.book_id}?note=${note.id}`}>
 									<span className="self-start px-2 py-0.5 rounded-md bg-accent/10 text-accent text-xs font-medium">
 										Rozdział {note.chapter_index + 1}
