@@ -127,3 +127,82 @@ export function NotesSkeleton() {
 		</div>
 	);
 }
+
+export function DashboardHomeSkeleton() {
+	return (
+		<div className="space-y-6 container mx-auto">
+			<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+				<div className="w-full max-w-md">
+					<ShimmerBlock className="w-3/4 h-9 sm:h-10 rounded-md" />
+					<div className="mt-3 h-1 w-16 bg-accent rounded-full" />
+					<ShimmerBlock className="mt-4 w-2/3 h-4 rounded-md" />
+				</div>
+				<div className="flex flex-col gap-2 w-full max-w-xs shrink-0">
+					<ShimmerBlock className="w-full h-4 rounded-md" />
+					<ShimmerBlock className="w-4/5 h-4 rounded-md" />
+					<ShimmerBlock className="w-1/3 h-3 rounded-md" />
+				</div>
+			</div>
+
+			<div className="bg-panel/60 border border-accent/20 rounded-2xl p-5 sm:p-6 flex flex-col gap-5 xl:flex-row xl:items-center xl:pr-20">
+				<div className="flex flex-col sm:flex-row gap-8 items-center xl:w-full">
+					<ShimmerBlock className="w-28 aspect-2/3 rounded-lg shrink-0" />
+					<div className="flex flex-col flex-1 w-full gap-2 items-center sm:items-start">
+						<ShimmerBlock className="w-32 h-3 rounded-md" />
+						<ShimmerBlock className="w-2/3 h-7 rounded-md" />
+						<ShimmerBlock className="w-1/3 h-4 rounded-md" />
+						<ShimmerBlock className="mt-4 w-full h-2 rounded-full" />
+						<ShimmerBlock className="mt-4 w-36 h-10 rounded-full" />
+					</div>
+				</div>
+				<div className="hidden lg:block w-px bg-accent/20 self-stretch" />
+				<div className="flex flex-col gap-2 xl:w-100 xl:ml-5">
+					<ShimmerBlock className="w-full h-3.5 rounded-md" />
+					<ShimmerBlock className="w-full h-3.5 rounded-md" />
+					<ShimmerBlock className="w-3/4 h-3.5 rounded-md" />
+					<ShimmerBlock className="mt-1 w-20 h-6 rounded-full" />
+				</div>
+			</div>
+
+			<div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+				<div className="bg-panel/60 border border-accent/20 rounded-2xl p-5">
+					<ShimmerBlock className="w-44 h-6 rounded-md mb-5" />
+					<div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+						{Array.from({ length: 2 }).map((_, i) => (
+							<div
+								key={i}
+								className="bg-main p-4 rounded-xl flex items-start gap-4">
+								<ShimmerBlock className="w-6 h-6 mt-2 rounded-md shrink-0" />
+								<div className="flex flex-col gap-2 w-full">
+									<ShimmerBlock className="w-12 h-8 rounded-md" />
+									<ShimmerBlock className="w-3/4 h-4 rounded-md" />
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
+				<div className="bg-panel/60 border border-accent/20 rounded-2xl p-5">
+					<div className="flex items-center justify-between mb-5">
+						<ShimmerBlock className="w-40 h-6 rounded-md" />
+						<ShimmerBlock className="w-28 h-4 rounded-md" />
+					</div>
+					<ul>
+						{Array.from({ length: 4 }).map((_, i) => (
+							<li
+								key={i}
+								className="flex items-center gap-4 py-3 border-b border-accent/10 last:border-b-0">
+								<ShimmerBlock className="w-10 aspect-2/3 rounded-md shrink-0" />
+								<div className="flex flex-col gap-2 flex-1">
+									<ShimmerBlock className="w-2/3 h-4 rounded-md" />
+									<ShimmerBlock className="w-1/3 h-3 rounded-md" />
+								</div>
+								<ShimmerBlock className="w-20 h-3 rounded-md shrink-0" />
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		</div>
+	);
+}
