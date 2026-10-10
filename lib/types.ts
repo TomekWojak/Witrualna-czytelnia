@@ -1,108 +1,124 @@
 import { Timestamp } from "next/dist/server/lib/cache-handlers/types";
 
 export type frameProps = {
-  asideOpen: boolean;
-  onAsideOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
-  viewPrefs: {
-    isDesktopAsideOpen: boolean;
-    isHeaderVisible: boolean;
-    isReaderPanelVisible: boolean;
-  };
-  onViewPrefs: React.Dispatch<
-    React.SetStateAction<{
-      isDesktopAsideOpen: boolean;
-      isHeaderVisible: boolean;
-      isReaderPanelVisible: boolean;
-    }>
-  >;
-  inputRefs: React.RefObject<HTMLInputElement | null>;
-  onDropboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleFileUpload: (file: File | undefined) => Promise<void>;
+	asideOpen: boolean;
+	onAsideOpenAction: React.Dispatch<React.SetStateAction<boolean>>;
+	viewPrefs: {
+		isDesktopAsideOpen: boolean;
+		isHeaderVisible: boolean;
+		isReaderPanelVisible: boolean;
+	};
+	onViewPrefs: React.Dispatch<
+		React.SetStateAction<{
+			isDesktopAsideOpen: boolean;
+			isHeaderVisible: boolean;
+			isReaderPanelVisible: boolean;
+		}>
+	>;
+	inputRefs: React.RefObject<HTMLInputElement | null>;
+	onDropboxOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	handleFileUpload: (file: File | undefined) => Promise<void>;
 };
 export type HeaderContextProps = {
-  title: string | undefined;
-  setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
-  author: string | undefined;
-  setAuthor: React.Dispatch<React.SetStateAction<string | undefined>>;
+	title: string | undefined;
+	setTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
+	author: string | undefined;
+	setAuthor: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 export type UserData = {
-  name: string | null;
-  avatar_url: string | null;
-  plan: string;
-  bio: string | null;
+	name: string | null;
+	avatar_url: string | null;
+	plan: string;
+	bio: string | null;
 };
 
 export type ImportResult =
-  | { success: true; message: string; id?: string }
-  | { success: false; message: string };
+	| { success: true; message: string; id?: string }
+	| { success: false; message: string };
+
+export type QuizQuestion = {
+	id: number;
+	text: string;
+};
+
+export type QuizQuestionsResult =
+	| { success: true; questions: QuizQuestion[] }
+	| { success: false; message: string };
+
+export type UserStatusResult =
+	| { success: true; plan: string }
+	| { success: false; message: string };
+
+export type ModelChapterResults =
+	{ success: true; content: string } | { success: false; message: string };
 
 export type UserContextProps = {
-  userData: UserData | null;
-  setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
+	userData: UserData | null;
+	setUserData: React.Dispatch<React.SetStateAction<UserData | null>>;
 };
 export type ViewPrefsContextProps = {
-  setViewPrefs: React.Dispatch<
-    React.SetStateAction<{
-      isDesktopAsideOpen: boolean;
-      isHeaderVisible: boolean;
-      isReaderPanelVisible: boolean;
-    }>
-  >;
-  viewPrefs: {
-    isDesktopAsideOpen: boolean;
-    isHeaderVisible: boolean;
-    isReaderPanelVisible: boolean;
-  };
+	setViewPrefs: React.Dispatch<
+		React.SetStateAction<{
+			isDesktopAsideOpen: boolean;
+			isHeaderVisible: boolean;
+			isReaderPanelVisible: boolean;
+		}>
+	>;
+	viewPrefs: {
+		isDesktopAsideOpen: boolean;
+		isHeaderVisible: boolean;
+		isReaderPanelVisible: boolean;
+	};
 };
 export type UploadInfoContextProps = {
-  setUploadingFileInfo: React.Dispatch<
-    React.SetStateAction<ImportResult | null>
-  >;
+	setUploadingFileInfo: React.Dispatch<
+		React.SetStateAction<ImportResult | null>
+	>;
 };
 export type Note = {
-  id: string;
-  paragraph_index: number;
-  chapter_index: number;
-  title: string;
-  description: string;
-  book_id?: string;
+	id: string;
+	paragraph_index: number;
+	chapter_index: number;
+	title: string;
+	description: string;
+	book_id?: string;
 };
 export type NoteWithBook = Note & {
-  books: { title: string; author: string } | null;
+	books: { title: string; author: string } | null;
 };
 export type BookInfo =
-  | {
-      success: true;
-      title: string;
-      author: string;
-      chapters: {
-        content: string;
-      }[];
-      book_id: string;
-      current_chapter_index: number;
-      has_been_read: boolean;
-      scroll_position: number;
-      notes: Note[];
-    }
-  | { success: false; message: string };
+	| {
+			success: true;
+			title: string;
+			author: string;
+			chapters: {
+				content: string;
+			}[];
+			book_id: string;
+			current_chapter_index: number;
+			has_been_read: boolean;
+			scroll_position: number;
+			notes: Note[];
+	  }
+	| { success: false; message: string };
 
 export type BookCounts =
-  | { success: true; read: number; favorites: number }
-  | { success: false; message: string };
+	| { success: true; read: number; favorites: number }
+	| { success: false; message: string };
 
 export type BookData =
-  | {
-      success: true;
-      books: {
-        id: string;
-        cover_url: string | null;
-        title: string;
-        author: string;
-        current_chapter_index: number;
-        chapter_count: number;
-        is_favorite: boolean;
-        has_been_read: boolean;
-        created_at: Timestamp;
-      }[];
-    }
-  | { success: false; message: string };
+	| {
+			success: true;
+			books: {
+				id: string;
+				cover_url: string | null;
+				title: string;
+				author: string;
+				current_chapter_index: number;
+				chapter_count: number;
+				is_favorite: boolean;
+				has_been_read: boolean;
+				created_at: Timestamp;
+			}[];
+	  }
+	| { success: false; message: string };

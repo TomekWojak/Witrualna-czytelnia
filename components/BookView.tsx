@@ -1,6 +1,7 @@
 "use client";
 import { HeaderTitleContext } from "@/lib/headerTitleContext";
 import { supabaseClient } from "@/lib/supabase";
+
 import {
 	useContext,
 	useEffect,
@@ -8,9 +9,15 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { BookInfo, Note } from "@/lib/types";
+import type {
+	BookInfo,
+	ImportResult,
+	Note,
+	UserStatusResult,
+} from "@/lib/types";
 import { UploadInfoContext } from "@/lib/UploadInfoContext";
 import { ViewPrefsContext } from "@/lib/ViewPrefsContext";
+import ChapterQuiz from "@/components/ChapterQuiz";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -189,9 +196,11 @@ function ReaderOptionMenu({
 export default function BookView({
 	response,
 	targetNodeId,
+	userStatus,
 }: {
 	response: BookInfo;
 	targetNodeId: string | undefined;
+	userStatus: UserStatusResult;
 }) {
 	const titleContext = useContext(HeaderTitleContext);
 	const uploadInfoContext = useContext(UploadInfoContext);
@@ -209,10 +218,13 @@ export default function BookView({
 			: response.current_chapter_index;
 	});
 
+	const userPlan = userStatus.success ? userStatus.plan : "";
 	const bookContainerRef = useRef<HTMLDivElement | null>(null);
 	const bookContentRef = useRef<HTMLDivElement | null>(null);
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const isFirstPageIndexRenderRef = useRef(true);
+
+	const [isQuizOpen, setIsQuizOpen] = useState(false);
 
 	const [notesMode, setNotesMode] = useState(false);
 	const [notes, setNotes] = useState<Note[] | []>(
@@ -674,8 +686,7 @@ export default function BookView({
 			</div>
 		);
 	}
-
-	const { title, author, chapters } = response;
+	const { title, author, chapters, book_id } = response;
 
 	return (
 		<>
@@ -865,6 +876,35 @@ export default function BookView({
 									);
 								})}
 						</div>
+
+						{userPlan === "pro" && (
+							<div className="mx-4 mt-12 py-12 border-t border-accent/20 flex flex-col items-center text-center gap-3">
+								<span className="text-xs uppercase tracking-[0.25em] text-mainTxt/50">
+									Koniec rozdziału
+								</span>
+								<p className="max-w-sm text-sm text-mainTxt/70">
+									Zatrzymaj się na chwilę i sprawdź, ile zostało ci w pamięci.
+								</p>
+								<button
+									onClick={() => setIsQuizOpen((p) => !p)}
+									type="button"
+									className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium shadow-sm cursor-pointer transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="16"
+										height="16"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round">
+										<path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386z"></path>
+									</svg>
+									Sprawdź się
+								</button>
+							</div>
+						)}
 					</div>
 				</div>
 
@@ -1226,6 +1266,15 @@ export default function BookView({
 				<div
 					onClick={() => setOpenMenu(null)}
 					className={`overlay fixed inset-0 z-10 ${openMenu ? "block" : "hidden"}`}></div>
+
+				{isQuizOpen && (
+					<ChapterQuiz
+						onClose={setIsQuizOpen}
+						bookId={book_id}
+						chapterIndex={pageIndex}
+					/>
+				)}
+
 				<audio loop ref={audioRef} src="/audios/cafe-sound.mp3"></audio>
 			</div>
 		</>

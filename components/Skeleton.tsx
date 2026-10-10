@@ -206,3 +206,25 @@ export function DashboardHomeSkeleton() {
 		</div>
 	);
 }
+
+export function QuizQuestionsSkeleton() {
+	return (
+		<ul
+			aria-busy="true"
+			aria-label="Przygotowuję pytania"
+			className="flex flex-col gap-5 p-5 sm:p-6 overflow-y-auto scrollbar-accent">
+			{Array.from({ length: 3 }).map((_, i) => (
+				<li key={i} className="flex flex-col gap-2">
+					<div className="flex items-start gap-3 mb-2">
+						<ShimmerBlock className="w-6 h-6 rounded-full shrink-0" />
+						<div className="flex flex-col gap-2 w-full">
+							<ShimmerBlock className="w-full h-4 rounded-md" />
+							<ShimmerBlock className="w-2/3 h-4 rounded-md" />
+						</div>
+					</div>
+					<ShimmerBlock className="w-full h-20 rounded-lg" />
+				</li>
+			))}
+		</ul>
+	);
+}
