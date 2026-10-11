@@ -45,6 +45,29 @@ export type QuizQuestionsResult =
 	| { success: true; questions: QuizQuestion[] }
 	| { success: false; message: string };
 
+export type QuizReviewInput = {
+	bookId: string;
+	chapterIndex: number;
+	answers: { question: string; answer: string }[];
+	reflection: string;
+};
+
+export type QuizReview = {
+	answers: {
+		id: number;
+		user_answer: string;
+		model_answer: string;
+	}[];
+	reflections: {
+		user_reflection: string;
+		model_reflection: string;
+	};
+};
+
+export type QuizReviewResult =
+	| { success: true; review: QuizReview }
+	| { success: false; message: string };
+
 export type UserStatusResult =
 	| { success: true; plan: string }
 	| { success: false; message: string };
