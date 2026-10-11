@@ -32,9 +32,7 @@ export default function ChapterQuiz({
 }) {
 	const [formState, setFormState] = useState<FormState>("questions");
 	const [answers, setAnswers] = useState<Record<number, string>>({});
-	const [questions, setQuestions] = useState<QuizQuestion[]>([
-		{ id: 1, text: "test" },
-	]);
+	const [questions, setQuestions] = useState<QuizQuestion[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [summaryLoading, setSummaryLoading] = useState(false);
 	const [sentenceIndex, setSentenceIndex] = useState(0);
@@ -180,7 +178,7 @@ export default function ChapterQuiz({
 	};
 
 	return (
-		<div className="quiz absolute w-[min(90%,700px)] max-h-[85%] left-1/2 top-1/2 -translate-1/2 flex flex-col bg-panel/95 backdrop-blur-sm rounded-xl border border-accent/30 shadow-lg text-mainTxt font-lora z-110">
+		<div className="quiz absolute w-[min(90%,900px)] max-h-[95%] left-1/2 top-1/2 -translate-1/2 flex flex-col bg-panel/95 backdrop-blur-sm rounded-xl border border-accent/30 shadow-lg text-mainTxt font-lora z-110">
 			{formState === "questions" && (
 				<>
 					<div className="flex items-start justify-between gap-4 p-5 sm:p-6 border-b border-accent/20">
@@ -191,7 +189,7 @@ export default function ChapterQuiz({
 							<h2 className="mt-1 font-playfairDisplay text-2xl">
 								Sprawdź się
 							</h2>
-							<p className="mt-1 text-sm text-mainTxt/60">
+							<p className="mt-1 text-md text-mainTxt/60">
 								Odpowiedz krótko, własnymi słowami. Nie zaglądaj do tekstu.
 							</p>
 						</div>
@@ -228,7 +226,7 @@ export default function ChapterQuiz({
 										<span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-semibold shrink-0">
 											{index + 1}
 										</span>
-										<span className="font-medium leading-snug">
+										<span className="font-medium leading-snug text-lg">
 											{question.text}
 										</span>
 									</label>
@@ -243,7 +241,7 @@ export default function ChapterQuiz({
 										id={`question-${question.id}`}
 										rows={3}
 										placeholder="Twoja odpowiedź…"
-										className="w-full resize-none border border-accent/30 rounded-lg bg-transparent p-3 text-sm outline-0 focus:border-accent transition-colors placeholder:text-accent"
+										className="w-full resize-none border border-accent/30 rounded-lg bg-transparent p-3 outline-0 focus:border-accent transition-colors placeholder:text-accent text-md"
 									/>
 								</li>
 							))}
@@ -313,7 +311,7 @@ export default function ChapterQuiz({
 							<h2 className="mt-1 font-playfairDisplay text-2xl">
 								Twoja refleksja
 							</h2>
-							<p className="mt-1 text-sm text-mainTxt/60">
+							<p className="mt-1 text-md text-mainTxt/60">
 								Napisz kilka zdań o tym rozdziale. Liczy się twoje zdanie, nie
 								streszczenie.
 							</p>
@@ -341,10 +339,10 @@ export default function ChapterQuiz({
 
 					<div className="flex flex-col gap-4 p-5 sm:p-6 overflow-y-auto scrollbar-accent">
 						<div className="rounded-lg bg-accent/5 border border-accent/15 p-4">
-							<span className="text-xs font-semibold uppercase tracking-wide text-accent/70">
+							<span className="text-sm font-semibold uppercase tracking-wide text-accent/70">
 								Możesz zacząć od
 							</span>
-							<ul className="mt-2 flex flex-col gap-1.5 text-sm text-mainTxt/70">
+							<ul className="mt-2 flex flex-col gap-1.5 text-md text-mainTxt/70">
 								<li>• Co w tym rozdziale zaskoczyło cię najbardziej?</li>
 								<li>
 									• Czy rozumiesz decyzje bohaterów? Postąpiłbyś tak samo?
@@ -362,9 +360,9 @@ export default function ChapterQuiz({
 							}}
 							value={reflectionValue}
 							rows={10}
-							maxLength={300}
+							maxLength={600}
 							placeholder="Zacznij pisać…"
-							className="w-full min-h-48 resize-y border border-accent/30 rounded-lg bg-transparent px-3 py-2 text-sm leading-relaxed outline-0 focus:border-accent transition-colors"
+							className="w-full min-h-48 resize-y border border-accent/30 rounded-lg bg-transparent px-3 py-2  leading-relaxed outline-0 focus:border-accent transition-colors text-md"
 						/>
 						<div className="flex justify-between items-center">
 							{emptyError && (
@@ -389,7 +387,7 @@ export default function ChapterQuiz({
 							)}
 							<span
 								className={`text-xs text-mainTxt/50 ${emptyError ? "" : "ml-auto"}`}>
-								{charactersCount} / 300 znaków
+								{charactersCount} / 600 znaków
 							</span>
 						</div>
 					</div>
@@ -444,7 +442,7 @@ export default function ChapterQuiz({
 							<h2 className="mt-1 font-playfairDisplay text-2xl">
 								Jak ci poszło?
 							</h2>
-							<p className="mt-1 text-sm text-mainTxt/60">
+							<p className="mt-1 text-md text-mainTxt/60">
 								Przeczytaj uwagi i wróć do fragmentów, które umknęły.
 							</p>
 						</div>
@@ -471,7 +469,7 @@ export default function ChapterQuiz({
 
 					<div className="flex flex-col gap-8 p-5 sm:p-6 overflow-y-auto scrollbar-accent">
 						<section className="flex flex-col gap-6">
-							<h3 className="text-xs font-semibold uppercase tracking-wide text-accent/70">
+							<h3 className="text-sm font-semibold uppercase tracking-wide text-accent/70">
 								Pytania
 							</h3>
 							<ul className="flex flex-col gap-8">
@@ -484,7 +482,7 @@ export default function ChapterQuiz({
 												<span className="flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-semibold shrink-0">
 													{item.id}
 												</span>
-												<span className="font-medium leading-snug">
+												<span className="font-medium leading-snug text-md">
 													{
 														questions.find(
 															(question) => question.id === item.id,
@@ -494,11 +492,11 @@ export default function ChapterQuiz({
 											</div>
 
 											<div className="flex flex-col gap-2 text-sm">
-												<span className="text-xs font-semibold uppercase tracking-wide text-mainTxt/50">
+												<span className="text-sm font-semibold uppercase tracking-wide text-mainTxt/50">
 													Twoja odpowiedź
 												</span>
 												<p
-													className={`p-4 border-l-3 rounded-r-md leading-relaxed whitespace-pre-line ${isAnswered ? "border-accent/50 bg-accent/5" : "border-mainTxt/20 bg-mainTxt/5 italic text-mainTxt/50"}`}>
+													className={`p-4 border-l-3 rounded-r-md leading-relaxed text-[0.98rem] whitespace-pre-line ${isAnswered ? "border-accent/50 bg-accent/5" : "border-mainTxt/20 bg-mainTxt/5 italic text-mainTxt/50"}`}>
 													{isAnswered
 														? item.user_answer
 														: "Nie udzielono odpowiedzi"}
@@ -506,7 +504,7 @@ export default function ChapterQuiz({
 											</div>
 
 											<div className="flex flex-col gap-2 text-sm sm:ml-6">
-												<span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-accent">
+												<span className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-accent">
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
 														width="14"
@@ -521,7 +519,7 @@ export default function ChapterQuiz({
 													</svg>
 													{isAnswered ? "Ocena" : "Co warto wiedzieć"}
 												</span>
-												<p className="p-4 border-l-3 border-accent bg-accent/15 rounded-r-md leading-relaxed whitespace-pre-line">
+												<p className="p-4 border-l-3 border-accent bg-accent/15 rounded-r-md leading-relaxed whitespace-pre-line text-[0.98rem]">
 													{item.model_answer}
 												</p>
 											</div>
@@ -539,16 +537,16 @@ export default function ChapterQuiz({
 							</h3>
 
 							<div className="flex flex-col gap-2 text-sm">
-								<span className="text-xs font-semibold uppercase tracking-wide text-mainTxt/50">
+								<span className="text-sm font-semibold uppercase tracking-wide text-mainTxt/50">
 									Twoja refleksja
 								</span>
-								<blockquote className="p-4 border-l-3 border-accent/50 bg-accent/5 rounded-r-md leading-relaxed italic whitespace-pre-line">
+								<blockquote className="p-4 border-l-3 border-accent/50 bg-accent/5 rounded-r-md leading-relaxed italic whitespace-pre-line text-[0.98rem]">
 									{summaryData.reflections.user_reflection}
 								</blockquote>
 							</div>
 
 							<div className="flex flex-col gap-2 text-sm sm:ml-6">
-								<span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-accent">
+								<span className="inline-flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide text-accent">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										width="14"
@@ -563,7 +561,7 @@ export default function ChapterQuiz({
 									</svg>
 									Uwagi do refleksji
 								</span>
-								<p className="p-4 border-l-3 border-accent bg-accent/15 rounded-r-md leading-relaxed whitespace-pre-line">
+								<p className="p-4 border-l-3 border-accent bg-accent/15 rounded-r-md leading-relaxed whitespace-pre-line text-[0.98rem]">
 									{summaryData.reflections.model_reflection}
 								</p>
 							</div>
@@ -611,7 +609,7 @@ export default function ChapterQuiz({
 						</h3>
 						<p
 							id="empty-questions-message"
-							className="text-sm text-mainTxt/70 leading-relaxed">
+							className="text-md text-mainTxt/70 leading-relaxed">
 							{emptyQuestionsInfo.message}
 						</p>
 						<div className="flex items-center justify-center gap-2 mt-2">

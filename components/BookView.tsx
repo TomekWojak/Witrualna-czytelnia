@@ -879,16 +879,16 @@ export default function BookView({
 
 						{userPlan === "pro" && (
 							<div className="mx-4 mt-12 py-12 border-t border-accent/20 flex flex-col items-center text-center gap-3">
-								<span className="text-xs uppercase tracking-[0.25em] text-mainTxt/50">
+								<span className="text-sm uppercase tracking-[0.25em] text-mainTxt/50">
 									Koniec rozdziału
 								</span>
-								<p className="max-w-sm text-sm text-mainTxt/70">
+								<p className="max-w-sm text-md text-mainTxt/70">
 									Zatrzymaj się na chwilę i sprawdź, ile zostało ci w pamięci.
 								</p>
 								<button
 									onClick={() => setIsQuizOpen((p) => !p)}
 									type="button"
-									className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel text-sm font-medium shadow-sm cursor-pointer transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95">
+									className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-linear-to-r from-accent to-accentSecondary text-panel text-md font-medium shadow-sm cursor-pointer transition-[filter,transform] duration-300 hover:brightness-110 active:scale-95">
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
 										width="16"
